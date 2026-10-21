@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 008.1 — Public-facing footer cleanup (2026-10-21)
+- 一覧・編集ページのフッターから「Paper Shaders ↗」への外部リンクを削除（通常版・単独HTML版）。
+- `LICENSE_NOTES.md` 内の第三者ライブラリとライセンス情報は維持。
+- 描画エンジン、編集操作、iframeレンダラーは変更なし。
+
 ## 008 — GitHub Pages packaging (2026-10-21)
 - 007の一覧・編集・配色UIを維持。
 - 生成するiframeのレンダラーを`embed/v1/index.html`へ固定（将来バージョン互換性用）。
