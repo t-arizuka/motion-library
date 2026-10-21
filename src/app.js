@@ -14,6 +14,22 @@ const  TEMPLATES={
     makeUniforms(lib,s,noiseTexture){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_colorBack:lib.getShaderColorFromString(s.colorBack),u_intensity:s.strength,u_softness:s.softness,u_noise:s.noise,u_shape:lib.GrainGradientShapes[s.shape],u_noiseTexture:noiseTexture};}
   }
 };
+const COLOR_PRESETS={
+  mesh:[
+    {name:'オパール',colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6']},
+    {name:'ミストブルー',colors:['#D3DDEA','#A9C5D4','#EEE8DC','#8EA5BD']},
+    {name:'セージ',colors:['#C2D0C3','#E2E4CF','#A2B9AE','#DDC6AF']},
+    {name:'テラコッタ',colors:['#D9A58C','#EFE0C7','#AC6E64','#C8B8B0']},
+    {name:'ナイト',colors:['#29334B','#526988','#B8A3B7','#6A7F91']}
+  ],
+  grain:[
+    {name:'スモーク',colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],colorBack:'#423B4C'},
+    {name:'グレイシア',colors:['#E2ECEA','#ACC7C7','#A1B8D4','#E2D2C9'],colorBack:'#303F51'},
+    {name:'フィルムローズ',colors:['#CDA8B9','#F1C5B6','#9D94B4','#C6CED2'],colorBack:'#493845'},
+    {name:'アース',colors:['#C1B6A0','#DFCBAC','#98B3A2','#D0AF94'],colorBack:'#4D5045'},
+    {name:'モノクロ',colors:['#F2F1EF','#ADB1B3','#565D65','#D8D9D6'],colorBack:'#24292F'}
+  ]
+};
 const sizing=()=>({u_fit:1,u_scale:1,u_rotation:0,u_originX:.5,u_originY:.5,u_offsetX:0,u_offsetY:0,u_worldWidth:0,u_worldHeight:0});
 const  deepCopy=x=>JSON.parse(JSON.stringify(x));
 const  COLORS=/^#[0-9A-F]{6}$/i;
@@ -101,10 +117,48 @@ function createColorField({label,value,onChange}){const row=document.createEleme
 function getEditorState(){return saved[editorId];}
 let editorId=null,isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches,device='desktop',showCopy=true;
 function refreshShader(){if(!currentMount||!lib)return;cancelAnimationFrame(paintFrame);paintFrame=requestAnimationFrame(()=>{paintFrame=0;if(!currentMount)return;try{const s=getEditorState();currentMount.setUniforms(TEMPLATES[editorId].makeUniforms(lib,s,texture));currentMount.setSpeed(isPlaying?s.speed:0);}catch(e){reportError($('preview-canvas'),e);}});}
-function mutate(cb){cb(getEditorState());persist();refreshShader();}
-function drawColors(){const group=$('color-controls');group.replaceChildren();getEditorState().colors.forEach((hex,index)=>group.append(createColorField({label:`カラー ${index+1}`,value:hex,onChange:hex=>mutate(s=>s.colors[index]=hex)})));if(editorId==='grain'){group.append(createColorField({label:'背景カラー',value:getEditorState().colorBack,onChange:hex=>mutate(s=>s.colorBack=hex)}));}}
+function mutate(cb){cb(getEditorState());persist();refreshShader();updatePresetSelection();}
+function drawColors(){const group=$('color-controls');group.replaceChildren();getEditorState().colors.forEach((hex,index)=>group.append(createColorField({label:`カラー ${index+1}`,value:hex,onChange:hex=>mutate(s=>s.colors[index]=hex)})));if(editorId==='grain'){group.append(createColorField({label:'背景カラー',value:getEditorState().colorBack,onChange:hex=>mutate(s=>s.colorBack=hex)}));}updatePresetSelection();}
+function updatePresetSelection(){
+  const s=getEditorState();
+  for(const button of document.querySelectorAll('.preset-option')){
+    const preset=COLOR_PRESETS[editorId][Number(button.dataset.preset)];
+    const selected=preset.colors.every((color,i)=>color===s.colors[i])&&(editorId!=='grain'||preset.colorBack===s.colorBack);
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  }
+}
+function buildPresets(){
+  const root=$('preset-options');
+  root.replaceChildren();
+  COLOR_PRESETS[editorId].forEach((preset,index)=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='preset-option';
+    button.dataset.preset=String(index);
+    button.setAttribute('aria-label',preset.name+' の配色を適用');
+    button.setAttribute('aria-pressed','false');
+    const swatch=document.createElement('span');
+    swatch.className='preset-swatch';
+    swatch.style.background=`linear-gradient(125deg,${preset.colors.join(',')})`;
+    const name=document.createElement('span');
+    name.className='preset-name';
+    name.textContent=preset.name;
+    button.append(swatch,name);
+    button.addEventListener('click',()=>{
+      mutate(s=>{
+        s.colors=[...preset.colors];
+        if(editorId==='grain')s.colorBack=preset.colorBack;
+      });
+      drawColors();
+      toast(preset.name+' を適用しました');
+    });
+    root.append(button);
+  });
+  updatePresetSelection();
+}
 function buildAdvanced(){const root=$('advanced-settings');root.replaceChildren();for(const def of TEMPLATES[editorId].advanced){const line=document.createElement('div');line.className='advanced-line';const label=document.createElement('label');const id='field-'+def.key;label.htmlFor=id;label.textContent=def.label;line.append(label);if(def.choices){const select=document.createElement('select');select.id=id;for(const [val,caption] of def.choices){const option=new Option(caption,val);select.add(option);}select.value=getEditorState()[def.key];select.addEventListener('change',()=>mutate(s=>s[def.key]=select.value));line.append(select);}else{const out=document.createElement('output');out.textContent=getEditorState()[def.key].toFixed(2);const range=document.createElement('input');range.type='range';range.id=id;range.min=def.min;range.max=def.max;range.step=def.step;range.value=getEditorState()[def.key];range.addEventListener('input',()=>{out.textContent=Number(range.value).toFixed(2);mutate(s=>s[def.key]=Number(range.value));});line.append(out,range);}root.append(line);}}
-function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
+function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();buildPresets();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
   $('speed').addEventListener('input',()=>{$('speed-val').textContent=Number($('speed').value).toFixed(2);mutate(s=>s.speed=Number($('speed').value));});$('strength').addEventListener('input',()=>{$('strength-val').textContent=Number($('strength').value).toFixed(2);mutate(s=>s.strength=Number($('strength').value));});
   function setDevice(next){device=next;$('preview-canvas').classList.toggle('mobile',device==='mobile');for(const button of document.querySelectorAll('[data-device]')){button.classList.toggle('active',button.dataset.device===device);button.setAttribute('aria-pressed',String(button.dataset.device===device));}}
   document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>setDevice(btn.dataset.device)));

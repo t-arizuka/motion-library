@@ -77,6 +77,24 @@ body[data-page="editor"] .footer{padding-block:16px}
 /* 007: plugin-free iframe export, only dialog controls changed. */
 .export-options{display:grid;gap:10px;margin:12px 0}.export-options>label{font-size:12px;font-weight:600;color:#34485c}.export-options>input{width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #d9e0e7;background:#fff;font-size:12px}.export-mode{display:flex;gap:18px;flex-wrap:wrap}.export-mode label{font-size:12px;color:#536172;cursor:pointer}.export-mode input{accent-color:#28384b}.export-warning{min-height:32px;font-size:11px;color:#607587;line-height:1.6;margin:8px 0}.embed-dialog #embed-code{height:clamp(160px,28vh,240px)}#copy-embed:disabled{opacity:.45;cursor:not-allowed}
 
+
+
+/* 009: Optional color presets; keep the editor compact when collapsed. */
+.preset-picker{border-top:1px solid #edf0f2;padding:17px 0 18px}
+.preset-picker>summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;color:#586674;font-size:12px;font-weight:650}
+.preset-picker>summary::-webkit-details-marker{display:none}
+.preset-picker>summary::before{content:'＋';font-size:15px;color:#8c9ba6;font-weight:400}
+.preset-picker[open]>summary::before{content:'−'}
+.preset-picker>summary span{margin-left:auto;font-size:10px;font-weight:400;color:#9aa6b0}
+.preset-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}
+.preset-option{appearance:none;min-width:0;display:flex;flex-direction:column;gap:7px;padding:6px;border-radius:9px;border:1px solid #e5e9ed;background:#fff;color:#556270;text-align:left;transition:border-color .15s,box-shadow .15s}
+.preset-option:hover{border-color:#a9b5bf}
+.preset-option:focus-visible{outline:2px solid #45667e;outline-offset:2px}
+.preset-option.is-selected{border-color:#536d80;box-shadow:0 0 0 1px #536d80}
+.preset-swatch{display:block;width:100%;height:38px;border-radius:5px}
+.preset-name{font-size:11px;font-weight:600;padding:0 3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preset-hint{font-size:10px;color:#9aa6b0;line-height:1.6;margin:12px 0 0}
+@media(prefers-reduced-motion:reduce){.preset-option{transition:none}}
 </style><script type="module">
 /** Visual engines are referenced, not vendored; see LICENSE_NOTES.md. */
 const  ENGINE_URL='https://esm.sh/@paper-design/shaders@0.0.78?bundle';
@@ -93,6 +111,22 @@ const  TEMPLATES={
     advanced:[{key:'softness',label:'色のなめらかさ',min:.2,max:1,step:.01},{key:'noise',label:'粒子の強さ',min:0,max:.6,step:.01},{key:'shape',label:'広がり方',choices:[['corners','コーナー'],['blob','やわらかなかたまり'],['sphere','円形'],['wave','波状']]}],
     makeUniforms(lib,s,noiseTexture){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_colorBack:lib.getShaderColorFromString(s.colorBack),u_intensity:s.strength,u_softness:s.softness,u_noise:s.noise,u_shape:lib.GrainGradientShapes[s.shape],u_noiseTexture:noiseTexture};}
   }
+};
+const COLOR_PRESETS={
+  mesh:[
+    {name:'オパール',colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6']},
+    {name:'ミストブルー',colors:['#D3DDEA','#A9C5D4','#EEE8DC','#8EA5BD']},
+    {name:'セージ',colors:['#C2D0C3','#E2E4CF','#A2B9AE','#DDC6AF']},
+    {name:'テラコッタ',colors:['#D9A58C','#EFE0C7','#AC6E64','#C8B8B0']},
+    {name:'ナイト',colors:['#29334B','#526988','#B8A3B7','#6A7F91']}
+  ],
+  grain:[
+    {name:'スモーク',colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],colorBack:'#423B4C'},
+    {name:'グレイシア',colors:['#E2ECEA','#ACC7C7','#A1B8D4','#E2D2C9'],colorBack:'#303F51'},
+    {name:'フィルムローズ',colors:['#CDA8B9','#F1C5B6','#9D94B4','#C6CED2'],colorBack:'#493845'},
+    {name:'アース',colors:['#C1B6A0','#DFCBAC','#98B3A2','#D0AF94'],colorBack:'#4D5045'},
+    {name:'モノクロ',colors:['#F2F1EF','#ADB1B3','#565D65','#D8D9D6'],colorBack:'#24292F'}
+  ]
 };
 const sizing=()=>({u_fit:1,u_scale:1,u_rotation:0,u_originX:.5,u_originY:.5,u_offsetX:0,u_offsetY:0,u_worldWidth:0,u_worldHeight:0});
 const  deepCopy=x=>JSON.parse(JSON.stringify(x));
@@ -181,10 +215,48 @@ function createColorField({label,value,onChange}){const row=document.createEleme
 function getEditorState(){return saved[editorId];}
 let editorId=null,isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches,device='desktop',showCopy=true;
 function refreshShader(){if(!currentMount||!lib)return;cancelAnimationFrame(paintFrame);paintFrame=requestAnimationFrame(()=>{paintFrame=0;if(!currentMount)return;try{const s=getEditorState();currentMount.setUniforms(TEMPLATES[editorId].makeUniforms(lib,s,texture));currentMount.setSpeed(isPlaying?s.speed:0);}catch(e){reportError($('preview-canvas'),e);}});}
-function mutate(cb){cb(getEditorState());persist();refreshShader();}
-function drawColors(){const group=$('color-controls');group.replaceChildren();getEditorState().colors.forEach((hex,index)=>group.append(createColorField({label:`カラー ${index+1}`,value:hex,onChange:hex=>mutate(s=>s.colors[index]=hex)})));if(editorId==='grain'){group.append(createColorField({label:'背景カラー',value:getEditorState().colorBack,onChange:hex=>mutate(s=>s.colorBack=hex)}));}}
+function mutate(cb){cb(getEditorState());persist();refreshShader();updatePresetSelection();}
+function drawColors(){const group=$('color-controls');group.replaceChildren();getEditorState().colors.forEach((hex,index)=>group.append(createColorField({label:`カラー ${index+1}`,value:hex,onChange:hex=>mutate(s=>s.colors[index]=hex)})));if(editorId==='grain'){group.append(createColorField({label:'背景カラー',value:getEditorState().colorBack,onChange:hex=>mutate(s=>s.colorBack=hex)}));}updatePresetSelection();}
+function updatePresetSelection(){
+  const s=getEditorState();
+  for(const button of document.querySelectorAll('.preset-option')){
+    const preset=COLOR_PRESETS[editorId][Number(button.dataset.preset)];
+    const selected=preset.colors.every((color,i)=>color===s.colors[i])&&(editorId!=='grain'||preset.colorBack===s.colorBack);
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  }
+}
+function buildPresets(){
+  const root=$('preset-options');
+  root.replaceChildren();
+  COLOR_PRESETS[editorId].forEach((preset,index)=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='preset-option';
+    button.dataset.preset=String(index);
+    button.setAttribute('aria-label',preset.name+' の配色を適用');
+    button.setAttribute('aria-pressed','false');
+    const swatch=document.createElement('span');
+    swatch.className='preset-swatch';
+    swatch.style.background=`linear-gradient(125deg,${preset.colors.join(',')})`;
+    const name=document.createElement('span');
+    name.className='preset-name';
+    name.textContent=preset.name;
+    button.append(swatch,name);
+    button.addEventListener('click',()=>{
+      mutate(s=>{
+        s.colors=[...preset.colors];
+        if(editorId==='grain')s.colorBack=preset.colorBack;
+      });
+      drawColors();
+      toast(preset.name+' を適用しました');
+    });
+    root.append(button);
+  });
+  updatePresetSelection();
+}
 function buildAdvanced(){const root=$('advanced-settings');root.replaceChildren();for(const def of TEMPLATES[editorId].advanced){const line=document.createElement('div');line.className='advanced-line';const label=document.createElement('label');const id='field-'+def.key;label.htmlFor=id;label.textContent=def.label;line.append(label);if(def.choices){const select=document.createElement('select');select.id=id;for(const [val,caption] of def.choices){const option=new Option(caption,val);select.add(option);}select.value=getEditorState()[def.key];select.addEventListener('change',()=>mutate(s=>s[def.key]=select.value));line.append(select);}else{const out=document.createElement('output');out.textContent=getEditorState()[def.key].toFixed(2);const range=document.createElement('input');range.type='range';range.id=id;range.min=def.min;range.max=def.max;range.step=def.step;range.value=getEditorState()[def.key];range.addEventListener('input',()=>{out.textContent=Number(range.value).toFixed(2);mutate(s=>s[def.key]=Number(range.value));});line.append(out,range);}root.append(line);}}
-function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
+function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();buildPresets();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
   $('speed').addEventListener('input',()=>{$('speed-val').textContent=Number($('speed').value).toFixed(2);mutate(s=>s.speed=Number($('speed').value));});$('strength').addEventListener('input',()=>{$('strength-val').textContent=Number($('strength').value).toFixed(2);mutate(s=>s.strength=Number($('strength').value));});
   function setDevice(next){device=next;$('preview-canvas').classList.toggle('mobile',device==='mobile');for(const button of document.querySelectorAll('[data-device]')){button.classList.toggle('active',button.dataset.device===device);button.setAttribute('aria-pressed',String(button.dataset.device===device));}}
   document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>setDevice(btn.dataset.device)));
@@ -253,6 +325,7 @@ Object.defineProperty(window,'motionLibraryState',{get(){return {page:PAGE,templ
 <div class="preview-backdrop"><div class="hero preview-surface" id="preview-canvas"><div class="thumbnail-fallback thumb-mesh"></div><div class="shader-host"></div><div class="text-vignette"></div><span class="surface-status">公式シェーダーを読み込み中…</span><div class="hero-copy"><span>BRAND MESSAGE / 2026</span><h2>新しい未来を、<br>ここから。</h2><p>可能性は、いつも創造の先にある。</p></div><span class="hero-watermark">MOTION LIBRARY / PREVIEW</span></div></div>
 <div class="preview-help"><span>カラーはHEXで自由に指定できます。</span><span>※シェーダーの表示にはネット接続が必要です。</span></div></section>
 <aside class="editor-panel" aria-label="背景を調整"><div class="panel-title"><div><div class="eyebrow">CUSTOMIZE</div><h2>背景を調整</h2></div><button type="button" id="reset" class="reset-link">初期化</button></div>
+<details class="preset-picker" id="preset-picker"><summary>カラープリセット <span>必要なときだけ</span></summary><div class="preset-options" id="preset-options" role="group" aria-label="カラープリセットを選択"></div><p class="preset-hint">選択後もカラーを自由に調整できます。</p></details>
 <section class="setting-section"><div class="section-heading"><span class="section-number">01</span><h3>カラー</h3></div><p class="section-help">色をクリック、またはHEXコードを直接入力</p><div class="color-controls" id="color-controls"></div></section>
 <section class="setting-section"><div class="section-heading"><span class="section-number">02</span><h3>動き</h3></div><div class="control-range"><div class="range-top"><label for="speed">速度</label><output id="speed-val">0.35</output></div><input id="speed" type="range" min="0" max="1.8" step="0.01" value="0.35"></div><div class="control-range"><div class="range-top"><label for="strength">動きの強さ</label><output id="strength-val">0.40</output></div><input id="strength" type="range" min="0" max="1" step="0.01" value="0.4"></div></section>
 <details class="advanced"><summary>細かい調整 <span>必要な場合だけ</span></summary><div id="advanced-settings"></div></details>

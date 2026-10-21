@@ -76,3 +76,20 @@ body[data-page="editor"] .footer{padding-block:16px}
 /* 007: plugin-free iframe export, only dialog controls changed. */
 .export-options{display:grid;gap:10px;margin:12px 0}.export-options>label{font-size:12px;font-weight:600;color:#34485c}.export-options>input{width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #d9e0e7;background:#fff;font-size:12px}.export-mode{display:flex;gap:18px;flex-wrap:wrap}.export-mode label{font-size:12px;color:#536172;cursor:pointer}.export-mode input{accent-color:#28384b}.export-warning{min-height:32px;font-size:11px;color:#607587;line-height:1.6;margin:8px 0}.embed-dialog #embed-code{height:clamp(160px,28vh,240px)}#copy-embed:disabled{opacity:.45;cursor:not-allowed}
 
+
+/* 009: Optional color presets; keep the editor compact when collapsed. */
+.preset-picker{border-top:1px solid #edf0f2;padding:17px 0 18px}
+.preset-picker>summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;color:#586674;font-size:12px;font-weight:650}
+.preset-picker>summary::-webkit-details-marker{display:none}
+.preset-picker>summary::before{content:'＋';font-size:15px;color:#8c9ba6;font-weight:400}
+.preset-picker[open]>summary::before{content:'−'}
+.preset-picker>summary span{margin-left:auto;font-size:10px;font-weight:400;color:#9aa6b0}
+.preset-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}
+.preset-option{appearance:none;min-width:0;display:flex;flex-direction:column;gap:7px;padding:6px;border-radius:9px;border:1px solid #e5e9ed;background:#fff;color:#556270;text-align:left;transition:border-color .15s,box-shadow .15s}
+.preset-option:hover{border-color:#a9b5bf}
+.preset-option:focus-visible{outline:2px solid #45667e;outline-offset:2px}
+.preset-option.is-selected{border-color:#536d80;box-shadow:0 0 0 1px #536d80}
+.preset-swatch{display:block;width:100%;height:38px;border-radius:5px}
+.preset-name{font-size:11px;font-weight:600;padding:0 3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preset-hint{font-size:10px;color:#9aa6b0;line-height:1.6;margin:12px 0 0}
+@media(prefers-reduced-motion:reduce){.preset-option{transition:none}}
