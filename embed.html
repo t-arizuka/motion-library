@@ -1,0 +1,57 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Motion Library — Background</title><style>html,body,#stage{margin:0;width:100%;height:100%;overflow:hidden}body{background:#1c293a}#stage{position:relative}#stage canvas{display:block;width:100%;height:100%;object-fit:cover}</style><script type="module">
+/** Visual engines are referenced, not vendored; see LICENSE_NOTES.md. */
+const  ENGINE_URL='https://esm.sh/@paper-design/shaders@0.0.78?bundle';
+const  TEMPLATES={
+  mesh:{
+    id:'mesh',title:'Mesh Gradient',subtitle:'柔らかな色が溶け合う背景',number:'01',fragment:'meshGradientFragmentShader',
+    defaults:{colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],speed:0.35,strength:0.40,swirl:0.09,grainMixer:0.04,grainOverlay:0.06},
+    advanced:[{key:'swirl',label:'渦の強さ',min:0,max:1,step:.01},{key:'grainMixer',label:'色の境界の粒子',min:0,max:.5,step:.01},{key:'grainOverlay',label:'表面の粒子感',min:0,max:.35,step:.01}],
+    makeUniforms(lib,s){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_distortion:s.strength,u_swirl:s.swirl,u_grainMixer:s.grainMixer,u_grainOverlay:s.grainOverlay};}
+  },
+  grain:{
+    id:'grain',title:'Grain Gradient',subtitle:'繊細な粒子と穏やかな色の表情',number:'02',fragment:'grainGradientFragmentShader',
+    defaults:{colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],colorBack:'#423B4C',speed:.35,strength:.45,softness:.75,noise:.23,shape:'corners'},
+    advanced:[{key:'softness',label:'色のなめらかさ',min:.2,max:1,step:.01},{key:'noise',label:'粒子の強さ',min:0,max:.6,step:.01},{key:'shape',label:'広がり方',choices:[['corners','コーナー'],['blob','やわらかなかたまり'],['sphere','円形'],['wave','波状']]}],
+    makeUniforms(lib,s,noiseTexture){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_colorBack:lib.getShaderColorFromString(s.colorBack),u_intensity:s.strength,u_softness:s.softness,u_noise:s.noise,u_shape:lib.GrainGradientShapes[s.shape],u_noiseTexture:noiseTexture};}
+  }
+};
+const sizing=()=>({u_fit:1,u_scale:1,u_rotation:0,u_originX:.5,u_originY:.5,u_offsetX:0,u_offsetY:0,u_worldWidth:0,u_worldHeight:0});
+const  deepCopy=x=>JSON.parse(JSON.stringify(x));
+const  COLORS=/^#[0-9A-F]{6}$/i;
+const  makeDefaultSettings=id=>deepCopy(TEMPLATES[id].defaults);
+
+
+const stage=document.getElementById('stage');
+let mount=null;
+function fail(err){stage.dataset.status='error';console.error('[Motion Library embed]',err);}
+function decodeConfig(){
+  const data=new URLSearchParams(location.search).get('data');
+  if(!data||data.length>5000||!/^[A-Za-z0-9_-]+$/.test(data))throw Error('設定URLが不正です');
+  const json=atob(data.replaceAll('-','+').replaceAll('_','/')+'='.repeat((4-data.length%4)%4));
+  const obj=JSON.parse(json);
+  if(obj.schemaVersion!==1||!Object.hasOwn(TEMPLATES,obj.template))throw Error('未対応の設定です');
+  const s=obj.settings, defaults=TEMPLATES[obj.template].defaults;
+  if(!s||!Array.isArray(s.colors)||s.colors.length!==4||!s.colors.every(c=>typeof c==='string'&&COLORS.test(c)))throw Error('カラーが不正です');
+  for(const key of Object.keys(defaults)){
+    if(key==='colors')continue;
+    if(key==='colorBack' && !COLORS.test(s[key]))throw Error('背景色が不正です');
+    else if(key==='shape' && !['corners','blob','sphere','wave'].includes(s[key]))throw Error('形状が不正です');
+    else if(!['colorBack','shape'].includes(key)&&(!Number.isFinite(s[key])||s[key]<0||s[key]>2))throw Error('パラメーターが不正です');
+  }
+  return obj;
+}
+async function init(){
+  const config=decodeConfig(),id=config.template,s=config.settings;
+  stage.style.backgroundColor=s.colorBack||s.colors[0];
+  stage.style.backgroundImage=`linear-gradient(125deg,${s.colors.join(',')})`;
+  if(!document.createElement('canvas').getContext('webgl2'))throw Error('WebGL2が利用できません');
+  const lib=await import(ENGINE_URL);
+  const uniforms=TEMPLATES[id].makeUniforms(lib,s,id==='grain'?await (async()=>{const img=lib.getShaderNoiseTexture();if(img&&!img.complete)await new Promise((res,rej)=>{img.addEventListener('load',res,{once:true});img.addEventListener('error',rej,{once:true});});if(img?.decode)await img.decode();return img;})():null);
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  mount=new lib.ShaderMount(stage,lib[TEMPLATES[id].fragment],uniforms,undefined,reduced?0:s.speed,0,1,1920*1080*2);
+  stage.dataset.status='ready';
+}
+init().catch(fail);
+window.addEventListener('pagehide',()=>mount?.dispose(),{once:true});
+
+</script></head><body><div id="stage" aria-hidden="true"></div></body></html>

@@ -1,0 +1,266 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Motion Library — Customize</title><style>
+:root{color-scheme:light;--ink:#17202b;--soft:#7c8590;--line:#e5e7eb;--bg:#fafafa;--paper:#fff;--blue:#1f2835;--radius:17px;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-size:13px}button,input,select{font:inherit}button{cursor:pointer}a{text-decoration:none;color:inherit}.shell{min-height:100vh;display:flex;flex-direction:column;max-width:1900px;margin:auto}.header{height:80px;background:#fff;border-bottom:1px solid #e8eaed;display:flex;align-items:center;gap:30px;padding:0 clamp(22px,4vw,64px)}.wordmark{display:inline-flex;align-items:center;gap:11px;font-weight:800;font-size:19px;letter-spacing:-.9px}.wordmark span>span{font-weight:400}.mark{display:flex;gap:4px;height:22px;align-items:center}.mark b{width:4px;height:15px;border-radius:3px;transform:skew(-17deg);background:#253d50}.mark b:nth-child(2){height:21px}.mark b:nth-child(3){height:13px}.header-label{font-size:10px;color:#a0a7af;letter-spacing:.15em;font-weight:800}.header-end,.header-back{margin-left:auto;color:#697583;font-size:11px;letter-spacing:.06em}.header-back{border:1px solid var(--line);border-radius:100px;padding:11px 17px;color:#34404e;font-weight:600}.header-back:hover{background:#f3f5f7}.eyebrow{font-size:10px;letter-spacing:.17em;color:#99a3ad;font-weight:800}.gallery-container{width:min(1270px,100%);margin:0 auto;padding:76px 28px 95px;flex:1}.gallery-lead{display:flex;align-items:end;justify-content:space-between;margin-bottom:38px}.gallery-lead h1{font-size:clamp(38px,4vw,58px);line-height:1.2;letter-spacing:-.055em;margin:20px 0 18px;font-weight:650}.gallery-lead p,.preview-heading p{font-size:13px;color:#86919d;margin:0;line-height:1.8}.count-block{display:flex;flex-direction:column;align-items:flex-end;gap:7px;color:#8f9aa4}.count-block strong{font-size:43px;font-weight:400;line-height:1}.count-block span{font-size:11px}.gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.gallery-card{border:1px solid #e4e6e9;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 20px rgba(21,29,37,.025);transition:transform .2s,box-shadow .2s}.gallery-card:hover{transform:translateY(-3px);box-shadow:0 14px 35px rgba(21,29,37,.08)}.gallery-screen{height:auto;aspect-ratio:1.6;position:relative;background:#b6beca;overflow:hidden}.gallery-screen-caption{position:absolute;z-index:4;bottom:22px;left:24px;color:rgba(255,255,255,.8);letter-spacing:.18em;font-size:10px;font-weight:700;text-shadow:0 1px 9px #4c576688;pointer-events:none}.thumbnail-fallback,.shader-host{position:absolute;inset:0}.thumbnail-fallback{z-index:0}.thumb-mesh{background:radial-gradient(ellipse at 18% 30%,#ddc1d4 0%,transparent 57%),radial-gradient(ellipse at 90% 87%,#96b9cb 0%,transparent 55%),linear-gradient(135deg,#a7a0bd,#c9bbb5 48%,#969caf)}.thumb-grain{background:radial-gradient(ellipse at 18% 81%,#bd9ea9 0%,transparent 52%),radial-gradient(ellipse at 78% 16%,#8aa9b2 0%,transparent 54%),linear-gradient(150deg,#837f9b,#b8a6aa 55%,#9791a8)}.shader-host{z-index:1}.shader-host canvas{width:100%!important;height:100%!important;display:block}.surface-status{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:max-content;max-width:80%;font-size:11px;line-height:1.6;padding:10px 13px;border-radius:6px;color:#fff;background:#202835a8;text-align:center}.surface-status.is-error{background:#3b3135d6}.card-info{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:25px 28px 28px}.card-type{font-size:9px;color:#a6aeb7;letter-spacing:.16em;font-weight:800}.card-info h2{font-size:24px;letter-spacing:-.035em;font-weight:650;margin:8px 0}.card-info p{font-size:12px;color:#89929e;margin:0;line-height:1.8}.circle-arrow{display:grid;place-items:center;border:1px solid #e1e5e8;border-radius:100%;width:38px;height:38px;flex:0 0 38px;font-size:18px;color:#5e6b76}.gallery-notes{display:flex;justify-content:space-between;gap:20px;color:#a0a8b1;font-size:11px;padding-top:23px}.footer{display:flex;justify-content:space-between;align-items:center;background:#fff;border-top:1px solid #e9ecee;padding:25px clamp(22px,4vw,64px);font-size:10px;color:#97a0a9;letter-spacing:.035em}.footer a:hover{text-decoration:underline}.editor-layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;min-height:calc(100vh - 141px);flex:1}.preview-area{padding:44px clamp(24px,3.3vw,52px) 50px;min-width:0}.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:31px}.preview-heading h1{font-size:clamp(28px,3vw,37px);font-weight:650;letter-spacing:-.047em;margin:10px 0 10px}.render-state{font-size:10px;border:1px solid #e5e9ed;padding:9px 12px;border-radius:50px;color:#919ba5;white-space:nowrap}.render-state.ready{color:#446b62;border-color:#c9ded5}.render-state.error{color:#9b5454}.preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:15px}.segments{display:flex;padding:3px;border:1px solid #e4e7eb;background:#f1f3f4;border-radius:9px}.segments button{border:0;background:transparent;font-size:12px;color:#9ca6ae;padding:8px 15px;border-radius:7px}.segments button.active{background:#fff;color:#1d2935;box-shadow:0 1px 3px #3b475521}.preview-tool-right{display:flex;align-items:center;gap:25px}.inline-check{font-size:11px;color:#75818d;display:flex;align-items:center;gap:6px;cursor:pointer}.inline-check input{accent-color:#33465a}.tool-link{font-size:11px;color:#5c6b7b;border:0;background:transparent;padding:8px 0}.preview-backdrop{height:min(620px,54vw);min-height:350px;border-radius:14px;background:#eceeef;border:1px solid #e4e7e9;display:flex;align-items:center;justify-content:center;padding:18px;overflow:hidden}.hero{width:100%;height:100%;position:relative;overflow:hidden;border-radius:6px;background:#b9bbca;box-shadow:0 9px 23px rgba(39,43,59,.08);transition:width .25s,height .25s}.hero.mobile{width:min(290px,100%);height:100%;}.hero-copy{position:absolute;z-index:5;left:8%;top:34%;color:#fff;text-shadow:0 1px 20px rgba(34,36,49,.15);pointer-events:none}.hero-copy span{font-size:10px;letter-spacing:.18em;font-weight:700}.hero-copy h2{font-size:clamp(27px,3.3vw,52px);line-height:1.5;font-weight:550;letter-spacing:-.06em;margin:16px 0 15px}.hero-copy p{font-size:12px;letter-spacing:.025em}.hero.mobile .hero-copy{left:8%;top:38%}.hero.mobile .hero-copy h2{font-size:24px}.hero.mobile .hero-copy span{font-size:8px}.hero.mobile .hero-copy p{font-size:9px}.hero.hide-copy .hero-copy{display:none}.hero-watermark{position:absolute;z-index:5;bottom:18px;right:20px;color:#fff9;letter-spacing:.12em;font-size:8px;pointer-events:none}.text-vignette{position:absolute;z-index:2;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(20,22,32,.19),transparent 68%)}.hero .surface-status{z-index:6}.preview-help{display:flex;justify-content:space-between;gap:10px;margin-top:17px;color:#a2aab2;font-size:10px}.editor-panel{background:#fff;border-left:1px solid #e9ecee;padding:39px 28px 35px;display:flex;flex-direction:column;min-width:0}.panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:19px}.panel-title h2{font-size:23px;letter-spacing:-.04em;font-weight:650;margin:11px 0 0}.reset-link{background:none;border:0;color:#919ba5;font-size:11px;text-decoration:underline;text-underline-offset:3px}.setting-section{padding:27px 0 28px;border-top:1px solid #edf0f2}.section-heading{display:flex;align-items:center;gap:11px;margin-bottom:16px}.section-heading h3{font-size:14px;letter-spacing:-.02em;margin:0;font-weight:650}.section-number{font-size:10px;color:#acb4bd;font-weight:700}.section-help{font-size:11px;color:#9da6af;margin:-4px 0 17px}.color-controls{display:grid;gap:12px}.color-field{display:flex;align-items:center;justify-content:space-between;gap:12px}.color-name{font-size:12px;color:#616e7a}.color-control{display:flex;gap:8px;align-items:center}.color-control input[type=color]{cursor:pointer;width:38px;height:34px;padding:3px;background:#fff;border:1px solid #dfe4e7;border-radius:7px}.hex-input{background:#fafbfc;width:95px;height:34px;border:1px solid #e4e8eb;border-radius:7px;color:#3b4653;letter-spacing:.04em;text-align:center;font-family:ui-monospace,Consolas,monospace;font-size:12px}.hex-input:focus{outline:1px solid #758da2}.hex-input.invalid{border-color:#d66565;background:#fff4f4}.control-range{margin-bottom:22px}.control-range:last-child{margin-bottom:0}.range-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.range-top label{font-size:12px;color:#626e7c}.range-top output,.advanced-line output{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#8b949d}.control-range input[type=range],.advanced-line input[type=range]{width:100%;accent-color:#34485c;cursor:pointer}.advanced{border-top:1px solid #edf0f2;padding:20px 0}.advanced summary{cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:#586674;display:flex;justify-content:space-between;align-items:center}.advanced summary::-webkit-details-marker{display:none}.advanced summary::before{content:'＋';display:inline-block;color:#8c9ba6;margin-right:8px;font-size:15px}.advanced[open] summary::before{content:'−'}.advanced summary span{font-size:10px;font-weight:400;color:#9aa6b0;margin-left:auto}.advanced-line{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding-top:19px}.advanced-line label{font-size:11px;color:#727d88}.advanced-line input[type=range],.advanced-line select{grid-column:1/-1;min-width:0}.advanced-line select{padding:9px;border:1px solid #e5e9ed;background:#fff;border-radius:7px;font-size:11px}.panel-actions{margin-top:auto;padding-top:25px;display:grid;gap:10px}.button-primary,.button-muted{border-radius:8px;padding:14px 16px;font-size:12px;font-weight:650;border:1px solid #dfe4e8}.button-primary{background:#28384b;color:white;border-color:#28384b;display:flex;align-items:center;justify-content:space-between}.button-primary:hover{background:#364b61}.button-muted{background:#fff;color:#556574}.button-muted:hover{background:#f6f7f9}.panel-actions p{font-size:10px;color:#a2aab3;margin:7px 0 0;line-height:1.7}.toast{opacity:0;transform:translateY(5px);pointer-events:none;position:fixed;bottom:25px;left:50%;z-index:100;background:#25384a;color:#fff;padding:12px 20px;border-radius:10px;box-shadow:0 10px 26px #192b3a33;transition:.2s;font-size:12px}.toast.visible{opacity:1;transform:translateY(0)}
+@media(max-width:1050px){.editor-layout{grid-template-columns:minmax(0,1fr) 310px}.editor-panel{padding:32px 20px}.preview-area{padding:35px 24px}.gallery-container{padding-top:54px}}
+@media(max-width:780px){.header{height:66px;padding:0 20px;gap:18px}.wordmark{font-size:17px}.header-label{display:none}.gallery-container{padding:45px 20px 75px}.gallery-lead{margin-bottom:26px}.gallery-lead h1{font-size:38px}.count-block strong{font-size:34px}.gallery-grid{grid-template-columns:1fr;gap:18px}.gallery-screen{aspect-ratio:1.65}.gallery-notes{flex-direction:column;gap:5px}.editor-layout{display:flex;flex-direction:column}.preview-area{padding:31px 18px 32px}.preview-backdrop{height:50vw;min-height:300px}.editor-panel{border-left:0;border-top:1px solid #e9ecee;padding:30px 22px}.panel-actions{margin-top:18px}.preview-help{flex-direction:column}.footer{padding:22px;gap:15px}}
+@media(max-width:430px){.header{padding:0 15px}.header-back{padding:10px 12px;font-size:10px}.gallery-lead{align-items:start;gap:5px}.gallery-lead h1{font-size:35px}.gallery-lead p{font-size:11px}.count-block strong{font-size:27px}.count-block span{font-size:9px}.gallery-container{padding-inline:15px}.gallery-screen{aspect-ratio:1.45}.card-info{padding:20px}.card-info h2{font-size:21px}.card-info p{font-size:11px}.preview-heading{align-items:start;gap:7px}.preview-heading h1{font-size:27px}.preview-heading p{font-size:11px}.preview-heading .eyebrow{font-size:9px}.render-state{font-size:9px;padding:7px}.preview-tool-right{gap:10px}.preview-backdrop{height:340px;padding:10px}.hero:not(.mobile) .hero-copy h2{font-size:27px}.hero:not(.mobile) .hero-copy{top:32%;left:7%}.hero.mobile{width:190px}.hero.mobile .hero-copy h2{font-size:20px}.preview-help{font-size:9px}.footer{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.gallery-card,.hero,.toast{transition:none}}
+
+
+/* 004: Compact editor header and larger above-the-fold preview.
+   Gallery screen, shader and editor interactions are intentionally unchanged. */
+body[data-page="editor"] .header{height:62px;padding-inline:clamp(18px,2.4vw,38px)}
+body[data-page="editor"] .editor-layout{min-height:calc(100vh - 118px)}
+body[data-page="editor"] .preview-area{padding:18px clamp(18px,2.4vw,38px) 22px}
+body[data-page="editor"] .preview-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;min-height:36px}
+body[data-page="editor"] .preview-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto;white-space:nowrap}
+body[data-page="editor"] .preview-identity .eyebrow{flex:none;font-size:9px;letter-spacing:.12em}
+body[data-page="editor"] .preview-heading h1{margin:0;font-size:clamp(20px,1.65vw,27px);font-weight:650;line-height:1.15;white-space:nowrap}
+body[data-page="editor"] .preview-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:0 0 auto;margin:0}
+body[data-page="editor"] .segments{flex:0 0 auto;padding:2px}
+body[data-page="editor"] .segments button{padding:7px 11px;font-size:11px}
+body[data-page="editor"] .preview-tool-right{gap:14px;white-space:nowrap}
+body[data-page="editor"] .inline-check{white-space:nowrap}
+body[data-page="editor"] .render-state{padding:7px 9px;font-size:9px}
+body[data-page="editor"] .preview-backdrop{height:clamp(370px,min(calc(100dvh - 192px),calc(60vw - 265px)),770px);min-height:0;padding:12px}
+body[data-page="editor"] .preview-help{margin-top:10px;font-size:10px}
+body[data-page="editor"] .editor-panel{padding-top:26px}
+body[data-page="editor"] .setting-section{padding-block:21px}
+body[data-page="editor"] .panel-actions{margin-top:8px;padding-top:12px}
+body[data-page="editor"] .footer{padding-block:16px}
+@media(max-width:1180px){
+  body[data-page="editor"] .preview-identity .eyebrow{display:none}
+  body[data-page="editor"] .preview-heading{gap:9px}
+  body[data-page="editor"] .preview-toolbar{gap:9px}
+  body[data-page="editor"] .preview-tool-right{gap:9px}
+  body[data-page="editor"] .render-state{font-size:9px;padding:6px}
+}
+@media(max-width:780px){
+  body[data-page="editor"] .preview-area{padding:18px 18px 25px}
+  body[data-page="editor"] .preview-heading{gap:12px}
+  body[data-page="editor"] .preview-identity .eyebrow{display:inline}
+  body[data-page="editor"] .preview-heading h1{font-size:23px}
+  body[data-page="editor"] .preview-backdrop{height:clamp(290px,65vw,540px);padding:10px}
+  body[data-page="editor"] .preview-help{flex-direction:row;flex-wrap:wrap}
+  body[data-page="editor"] .editor-panel{padding:24px 22px}
+}
+@media(max-width:650px){
+  body[data-page="editor"] .preview-heading{flex-wrap:wrap;align-items:center;row-gap:12px}
+  body[data-page="editor"] .preview-toolbar{justify-content:space-between;width:100%;flex:1 1 100%;gap:8px}
+  body[data-page="editor"] .preview-identity .eyebrow{display:none}
+}
+@media(max-width:430px){
+  body[data-page="editor"] .preview-area{padding:16px 12px 21px}
+  body[data-page="editor"] .preview-heading h1{font-size:21px}
+  body[data-page="editor"] .preview-toolbar{gap:6px}
+  body[data-page="editor"] .preview-tool-right{gap:10px}
+  body[data-page="editor"] .render-state{font-size:8px}
+  body[data-page="editor"] .preview-backdrop{height:320px}
+  body[data-page="editor"] .segments button{padding:7px 10px}
+}
+
+/* 005: WordPress export, keeps the approved 004 layout unchanged. */
+.secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.secondary-actions .button-muted{padding:12px 8px;font-size:11px}
+.embed-dialog{border:1px solid #e6eaf0;border-radius:16px;box-shadow:0 24px 90px #19253344;width:min(730px,calc(100vw - 28px));max-height:min(88dvh,820px);padding:28px;background:white;color:#243041}
+.embed-dialog::backdrop{background:rgba(16,25,38,.55);backdrop-filter:blur(3px)}
+.embed-dialog-head{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.embed-dialog-head h2{margin:7px 0 0;font-size:25px;letter-spacing:-.05em}
+.dialog-close{border:1px solid #e4e8ec;border-radius:99px;background:#fff;color:#566574;width:34px;height:34px;font-size:21px;line-height:1}
+.embed-description{font-size:12px;color:#657383;line-height:1.8;margin:18px 0 14px}
+#embed-code{width:100%;height:clamp(210px,43vh,380px);padding:14px;border-radius:9px;border:1px solid #dce2e7;background:#f7f8fa;resize:vertical;box-sizing:border-box;font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#3b4956;white-space:pre;overflow:auto}
+.embed-dialog-actions{display:flex;gap:9px;align-items:stretch;margin-top:14px}
+.embed-dialog-actions .button-primary{flex:1;gap:16px}
+.embed-dialog-actions .button-muted{flex:0 0 auto}
+.embed-caveat{font-size:11px;line-height:1.8;color:#89929b;margin:16px 0 0}
+@media(max-width:540px){.embed-dialog{padding:20px 16px}.embed-dialog-actions{flex-direction:column}.embed-dialog-actions .button-muted{flex:1}}
+
+/* 007: plugin-free iframe export, only dialog controls changed. */
+.export-options{display:grid;gap:10px;margin:12px 0}.export-options>label{font-size:12px;font-weight:600;color:#34485c}.export-options>input{width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #d9e0e7;background:#fff;font-size:12px}.export-mode{display:flex;gap:18px;flex-wrap:wrap}.export-mode label{font-size:12px;color:#536172;cursor:pointer}.export-mode input{accent-color:#28384b}.export-warning{min-height:32px;font-size:11px;color:#607587;line-height:1.6;margin:8px 0}.embed-dialog #embed-code{height:clamp(160px,28vh,240px)}#copy-embed:disabled{opacity:.45;cursor:not-allowed}
+
+</style><script type="module">
+/** Visual engines are referenced, not vendored; see LICENSE_NOTES.md. */
+const  ENGINE_URL='https://esm.sh/@paper-design/shaders@0.0.78?bundle';
+const  TEMPLATES={
+  mesh:{
+    id:'mesh',title:'Mesh Gradient',subtitle:'柔らかな色が溶け合う背景',number:'01',fragment:'meshGradientFragmentShader',
+    defaults:{colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],speed:0.35,strength:0.40,swirl:0.09,grainMixer:0.04,grainOverlay:0.06},
+    advanced:[{key:'swirl',label:'渦の強さ',min:0,max:1,step:.01},{key:'grainMixer',label:'色の境界の粒子',min:0,max:.5,step:.01},{key:'grainOverlay',label:'表面の粒子感',min:0,max:.35,step:.01}],
+    makeUniforms(lib,s){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_distortion:s.strength,u_swirl:s.swirl,u_grainMixer:s.grainMixer,u_grainOverlay:s.grainOverlay};}
+  },
+  grain:{
+    id:'grain',title:'Grain Gradient',subtitle:'繊細な粒子と穏やかな色の表情',number:'02',fragment:'grainGradientFragmentShader',
+    defaults:{colors:['#C3B6CE','#E2C3B8','#A4BAD0','#D6D0C6'],colorBack:'#423B4C',speed:.35,strength:.45,softness:.75,noise:.23,shape:'corners'},
+    advanced:[{key:'softness',label:'色のなめらかさ',min:.2,max:1,step:.01},{key:'noise',label:'粒子の強さ',min:0,max:.6,step:.01},{key:'shape',label:'広がり方',choices:[['corners','コーナー'],['blob','やわらかなかたまり'],['sphere','円形'],['wave','波状']]}],
+    makeUniforms(lib,s,noiseTexture){return {...sizing(),u_colors:s.colors.map(lib.getShaderColorFromString),u_colorsCount:4,u_colorBack:lib.getShaderColorFromString(s.colorBack),u_intensity:s.strength,u_softness:s.softness,u_noise:s.noise,u_shape:lib.GrainGradientShapes[s.shape],u_noiseTexture:noiseTexture};}
+  }
+};
+const sizing=()=>({u_fit:1,u_scale:1,u_rotation:0,u_originX:.5,u_originY:.5,u_offsetX:0,u_offsetY:0,u_worldWidth:0,u_worldHeight:0});
+const  deepCopy=x=>JSON.parse(JSON.stringify(x));
+const  COLORS=/^#[0-9A-F]{6}$/i;
+const  makeDefaultSettings=id=>deepCopy(TEMPLATES[id].defaults);
+
+
+
+const numberRanges={speed:[0,1.8],strength:[0,1],swirl:[0,1],grainMixer:[0,.5],grainOverlay:[0,.35],softness:[.2,1],noise:[0,.6]};
+function normalizeConfig(template,input){
+  if(!Object.hasOwn(TEMPLATES,template)||!input||typeof input!=='object')throw Error('背景の設定に問題があります');
+  const defaults=TEMPLATES[template].defaults;
+  if(!Array.isArray(input.colors)||input.colors.length!==4||!input.colors.every(v=>typeof v==='string'&&COLORS.test(v)))throw Error('カラーは #RRGGBB 形式で指定してください');
+  const settings={...defaults,colors:input.colors.map(x=>x.toUpperCase())};
+  for(const key of Object.keys(defaults)){
+    if(key==='colors')continue;
+    const value=input[key];
+    if(key==='colorBack'){if(!COLORS.test(value))throw Error('背景色が不正です');settings[key]=value.toUpperCase();}
+    else if(key==='shape'){if(!['corners','blob','sphere','wave'].includes(value))throw Error('形状が不正です');settings[key]=value;}
+    else{const range=numberRanges[key];if(typeof value!=='number'||!Number.isFinite(value)||!range||value<range[0]||value>range[1])throw Error(key+' が範囲外です');settings[key]=value;}
+  }
+  return {schemaVersion:1,template,settings};
+}
+function encodeConfig(template,input){
+  const json=JSON.stringify(normalizeConfig(template,input));
+  return btoa(json).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+}
+function normalizePublishUrl(input){
+  const value=String(input||'').trim();
+  let url;
+  try{url=new URL(value);}catch(e){throw Error('公開URLを入力してください（https://〜）');}
+  if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw Error('公開URLは https:// で始まり、? や # を含まないURLにしてください');
+  if(['localhost','127.0.0.1'].includes(url.hostname))throw Error('WordPress用コードには公開されたHTTPSのURLが必要です');
+  if(['github.com','raw.githubusercontent.com'].includes(url.hostname))throw Error('GitHubのリポジトリURLではなく、GitHub Pagesの公開URLを入力してください');
+  url.pathname=url.pathname.replace(/\/(?:index|editor|open|edit)\.html$/i,'/');
+  url.pathname=url.pathname.replace(/\/$/,'')+'/';
+  return url;
+}
+function generateIframeEmbed(template,settings,publishUrl,mode='with-text'){
+  const cfg=encodeConfig(template,settings);
+  const base=normalizePublishUrl(publishUrl);
+  const target=new URL('embed/v1/index.html',base);target.searchParams.set('data',cfg);
+  const background=settings.colorBack||settings.colors[0];
+  const frame=`<iframe title="Motion Library 背景" aria-hidden="true" tabindex="-1" loading="eager" src="${target.href.replaceAll('&','&amp;')}" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>`;
+  const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;min-height:clamp(360px,70vh,760px);overflow:hidden;background:${background}">`;
+  if(mode==='background')return wrapperStart+frame+'</div>';
+  if(mode!=='with-text')throw Error('出力形式が不正です');
+  // Text/buttons are normal WordPress HTML outside the iframe (and stay clickable).
+  const overlay=`<div class="motion-library-mv-content" style="position:relative;z-index:1;min-height:clamp(360px,70vh,760px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>`;
+  // A single line helps Classic Editor avoid wpautop injecting unwanted tags.
+  return wrapperStart+frame+overlay+'</div>';
+}
+function localPreviewUrl(template,settings){
+  const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));return u.href;
+}
+
+
+
+
+const $=id=>document.getElementById(id);
+const PAGE=document.body.dataset.page;
+const KEY='motion-library-gallery-editor-003';
+const limits={speed:[0,1.8],strength:[0,1],swirl:[0,1],grainMixer:[0,.5],grainOverlay:[0,.35],softness:[.2,1],noise:[0,.6]};
+let lib=null,texture=null,currentMount=null,mountEpoch=0,paintFrame=0,noticeTimer=0;
+const saved={};
+function toast(msg){const box=$('toast');if(!box)return;box.textContent=msg;box.classList.add('visible');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>box.classList.remove('visible'),2600);}
+function readSaved(){try{const raw=JSON.parse(localStorage.getItem(KEY)||'{}');for(const id of Object.keys(TEMPLATES)){if(raw[id])saved[id]=validate(id,raw[id]);}}catch(err){console.warn('保存済みデータの読み込み:',err);}}
+function validate(id,raw){if(!raw||typeof raw!=='object'||!Array.isArray(raw.colors)||raw.colors.length!==4||!raw.colors.every(c=>COLORS.test(c)))throw Error('設定ファイルのカラーが不正です');
+  const result=makeDefaultSettings(id);result.colors=raw.colors.map(c=>c.toUpperCase());
+  for(const key of Object.keys(result)){if(key==='colors')continue;const x=raw[key];if(key==='colorBack'){if(!COLORS.test(x))throw Error('背景色の形式が不正です');result[key]=x.toUpperCase();continue;}if(key==='shape'){if(!['corners','blob','sphere','wave'].includes(x))throw Error('形状が不正です');result[key]=x;continue;}const range=limits[key];if(range && typeof x==='number'&&Number.isFinite(x))result[key]=Math.max(range[0],Math.min(range[1],x));}
+  return result;
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){console.warn('自動保存が使用できません',e);}}
+function canvasAvailable(){return !!document.createElement('canvas').getContext('webgl2');}
+async function engine(){if(!canvasAvailable())throw Error('WebGL2を利用できません。ブラウザのグラフィック設定をご確認ください。');lib??=await import(ENGINE_URL);for(const key of ['ShaderMount','getShaderColorFromString','getShaderNoiseTexture','meshGradientFragmentShader','grainGradientFragmentShader','GrainGradientShapes']){if(!(key in lib))throw Error('描画エンジンの仕様が変更されました: '+key);}return lib;}
+async function noise(){if(!texture){texture=lib.getShaderNoiseTexture();if(texture&&!texture.complete&&texture.decode)await texture.decode();}return texture;}
+async function mountShader(id,host,settings,{live=false,downsample=false}={}){const source=lib[TEMPLATES[id].fragment];const tex=id==='grain'?await noise():null;const uniforms=TEMPLATES[id].makeUniforms(lib,settings,tex);const next=new lib.ShaderMount(host,source,uniforms,undefined,live?settings.speed:0,0,downsample?1:1.25,downsample?700000:1920*1080*2);return next;}
+function reportError(host,error){console.error('[Motion Library]',error);const layer=host.closest('.preview-surface')?.querySelector('.surface-status');if(layer){layer.classList.add('is-error');layer.textContent=`描画を読み込めませんでした: ${error.message||error}`;}else{host.dataset.error=error.message||String(error);}}
+function clearStatus(host){const el=host.closest('.preview-surface')?.querySelector('.surface-status');if(el)el.hidden=true;}
+function fileName(){return PAGE==='gallery'?'open.html':'edit.html';}
+async function startGallery(){readSaved();const galleries=[...document.querySelectorAll('[data-preview-id]')];try{await engine();const created=await Promise.allSettled(galleries.map(async surface=>{const id=surface.dataset.previewId,host=surface.querySelector('.shader-host');const mount=await mountShader(id,host,saved[id]||makeDefaultSettings(id),{downsample:true});clearStatus(host);return mount;}));const mounts=created.filter(x=>x.status==='fulfilled').map(x=>x.value);created.forEach((result,i)=>{if(result.status==='rejected')reportError(galleries[i].querySelector('.shader-host'),result.reason);});window.addEventListener('pagehide',()=>mounts.forEach(m=>m.dispose()));}catch(e){galleries.forEach(s=>reportError(s.querySelector('.shader-host'),e));}}
+function selectedTemplate(){const search=new URLSearchParams(location.search).get('template');return Object.hasOwn(TEMPLATES,search)?search:'mesh';}
+function createColorField({label,value,onChange}){const row=document.createElement('div');row.className='color-field';const text=document.createElement('label');text.className='color-name';text.textContent=label;const wrap=document.createElement('div');wrap.className='color-control';const chooser=document.createElement('input');chooser.type='color';chooser.value=value;chooser.setAttribute('aria-label',label+' をカラーピッカーで変更');const hex=document.createElement('input');hex.type='text';hex.className='hex-input';hex.inputMode='text';hex.maxLength=7;hex.value=value.toUpperCase();hex.setAttribute('aria-label',label+' のHEXカラー');hex.spellcheck=false;
+  function apply(value){const cleaned=value.trim().toUpperCase();if(!COLORS.test(cleaned)){hex.classList.add('invalid');hex.setAttribute('aria-invalid','true');return;}hex.classList.remove('invalid');hex.removeAttribute('aria-invalid');chooser.value=cleaned;hex.value=cleaned;onChange(cleaned);}
+  chooser.addEventListener('input',()=>apply(chooser.value));hex.addEventListener('input',()=>{if(COLORS.test(hex.value))apply(hex.value);else{hex.classList.add('invalid');hex.setAttribute('aria-invalid','true');}});hex.addEventListener('change',()=>{if(!COLORS.test(hex.value)){hex.value=chooser.value.toUpperCase();hex.classList.remove('invalid');hex.removeAttribute('aria-invalid');}else apply(hex.value);});wrap.append(chooser,hex);row.append(text,wrap);return row;}
+function getEditorState(){return saved[editorId];}
+let editorId=null,isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches,device='desktop',showCopy=true;
+function refreshShader(){if(!currentMount||!lib)return;cancelAnimationFrame(paintFrame);paintFrame=requestAnimationFrame(()=>{paintFrame=0;if(!currentMount)return;try{const s=getEditorState();currentMount.setUniforms(TEMPLATES[editorId].makeUniforms(lib,s,texture));currentMount.setSpeed(isPlaying?s.speed:0);}catch(e){reportError($('preview-canvas'),e);}});}
+function mutate(cb){cb(getEditorState());persist();refreshShader();}
+function drawColors(){const group=$('color-controls');group.replaceChildren();getEditorState().colors.forEach((hex,index)=>group.append(createColorField({label:`カラー ${index+1}`,value:hex,onChange:hex=>mutate(s=>s.colors[index]=hex)})));if(editorId==='grain'){group.append(createColorField({label:'背景カラー',value:getEditorState().colorBack,onChange:hex=>mutate(s=>s.colorBack=hex)}));}}
+function buildAdvanced(){const root=$('advanced-settings');root.replaceChildren();for(const def of TEMPLATES[editorId].advanced){const line=document.createElement('div');line.className='advanced-line';const label=document.createElement('label');const id='field-'+def.key;label.htmlFor=id;label.textContent=def.label;line.append(label);if(def.choices){const select=document.createElement('select');select.id=id;for(const [val,caption] of def.choices){const option=new Option(caption,val);select.add(option);}select.value=getEditorState()[def.key];select.addEventListener('change',()=>mutate(s=>s[def.key]=select.value));line.append(select);}else{const out=document.createElement('output');out.textContent=getEditorState()[def.key].toFixed(2);const range=document.createElement('input');range.type='range';range.id=id;range.min=def.min;range.max=def.max;range.step=def.step;range.value=getEditorState()[def.key];range.addEventListener('input',()=>{out.textContent=Number(range.value).toFixed(2);mutate(s=>s[def.key]=Number(range.value));});line.append(out,range);}root.append(line);}}
+function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
+  $('speed').addEventListener('input',()=>{$('speed-val').textContent=Number($('speed').value).toFixed(2);mutate(s=>s.speed=Number($('speed').value));});$('strength').addEventListener('input',()=>{$('strength-val').textContent=Number($('strength').value).toFixed(2);mutate(s=>s.strength=Number($('strength').value));});
+  function setDevice(next){device=next;$('preview-canvas').classList.toggle('mobile',device==='mobile');for(const button of document.querySelectorAll('[data-device]')){button.classList.toggle('active',button.dataset.device===device);button.setAttribute('aria-pressed',String(button.dataset.device===device));}}
+  document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>setDevice(btn.dataset.device)));
+  $('show-text').addEventListener('change',()=>{$('preview-canvas').classList.toggle('hide-copy',!$('show-text').checked);showCopy=$('show-text').checked;});
+  $('play').addEventListener('click',()=>{isPlaying=!isPlaying;$('play').textContent=isPlaying?'一時停止':'再生';currentMount?.setSpeed(isPlaying?getEditorState().speed:0);});$('play').textContent=isPlaying?'一時停止':'再生';
+  $('reset').addEventListener('click',()=>{if(!confirm('このアニメーションの色と設定を初期値に戻しますか？'))return;saved[editorId]=makeDefaultSettings(editorId);persist();const val=getEditorState();drawColors();buildAdvanced();$('speed').value=val.speed;$('strength').value=val.strength;$('speed-val').textContent=val.speed.toFixed(2);$('strength-val').textContent=val.strength.toFixed(2);refreshShader();toast('初期設定に戻しました');});
+  $('save').addEventListener('click',()=>{const file={schemaVersion:3,template:editorId,settings:deepCopy(getEditorState())};const blob=new Blob([JSON.stringify(file,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`motion-${editorId}-settings.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('設定を保存しました');});
+  $('load').addEventListener('click',()=>$('load-file').click());$('load-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>64000)throw Error('ファイルが大きすぎます');const data=JSON.parse(await file.text());if(data.schemaVersion!==3||data.template!==editorId)throw Error('このアニメーション用の設定ファイルではありません');saved[editorId]=validate(editorId,data.settings);persist();drawColors();buildAdvanced();const s=getEditorState();$('speed').value=s.speed;$('strength').value=s.strength;$('speed-val').textContent=s.speed.toFixed(2);$('strength-val').textContent=s.strength.toFixed(2);refreshShader();toast('設定を読み込みました');}catch(err){toast(`読み込みエラー: ${err.message||err}`);}finally{e.target.value='';}});
+  // No-plugin background iframe export. All copy and buttons remain in WordPress DOM.
+  const embedDialog=$('embed-dialog');
+  const publishUrl=$('publish-url');
+  try{
+    const stored=localStorage.getItem('ml-publish-base')||'';
+    publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
+  }catch(e){}
+  const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()));
+  function refreshExport(){
+    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    try{
+      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode);
+      $('embed-code').value=code;
+      $('export-warning').textContent='このコードはクラシックエディタの「テキスト」タブに貼り付けます。文字・ボタンはiframeの外側にあるためWordPressで編集できます。';
+      $('copy-embed').disabled=false;
+      try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
+    }catch(error){
+      $('embed-code').value='';
+      $('copy-embed').disabled=true;
+      $('export-warning').textContent='公開URLが必要です。アプリ一式をGitHub Pages等へ公開し、そのフォルダURLを入力してください。ローカル表示テストは公開前でも利用できます。';
+    }
+  }
+  $('export-wp').addEventListener('click',()=>{refreshExport();embedDialog.showModal();});
+  publishUrl.addEventListener('input',refreshExport);
+  document.querySelectorAll('input[name="export-mode"]').forEach(r=>r.addEventListener('change',refreshExport));
+  $('close-embed').addEventListener('click',()=>embedDialog.close());
+  embedDialog.addEventListener('click',e=>{if(e.target===embedDialog)embedDialog.close();});
+  $('copy-embed').addEventListener('click',async()=>{
+    const code=$('embed-code').value;
+    if(!code)return;
+    try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(code);toast('WordPress用HTMLをコピーしました');return;}}catch(e){}
+    $('embed-code').focus();$('embed-code').select();
+    if(document.execCommand('copy'))toast('WordPress用HTMLをコピーしました');
+    else toast('Ctrl+Cでコピーしてください');
+  });
+  $('download-test').addEventListener('click',()=>{
+    window.open(localTest(),'_blank','noopener');
+    toast('重ね表示の確認ページを開きました');
+  });
+  window.addEventListener('pagehide',()=>{cancelAnimationFrame(paintFrame);currentMount?.dispose();});
+  startEditorRender();
+}
+async function startEditorRender(){const epoch=++mountEpoch,host=$('preview-canvas').querySelector('.shader-host');try{await engine();if(epoch!==mountEpoch)return;currentMount=await mountShader(editorId,host,getEditorState(),{live:isPlaying});if(epoch!==mountEpoch){currentMount.dispose();currentMount=null;return;}clearStatus(host);$('gpu-state').textContent='WebGL2';$('gpu-state').classList.add('ready');}catch(e){reportError(host,e);$('gpu-state').textContent='描画エラー';$('gpu-state').classList.add('error');}}
+if(PAGE==='gallery')startGallery();if(PAGE==='editor')setupEditor();
+Object.defineProperty(window,'motionLibraryState',{get(){return {page:PAGE,template:editorId,settings:editorId?deepCopy(getEditorState()):null,ready:!!currentMount,device,isPlaying};}});
+
+</script></head>
+<body data-page="editor"><div class="shell">
+<header class="header"><a class="wordmark" href="open.html" aria-label="Motion Library 一覧へ"><span class="mark"><b></b><b></b><b></b></span><span>motion<span>library</span></span></a><span class="header-label">EDITOR / NO-PLUGIN BETA</span><a class="header-back" href="open.html">← 一覧へ戻る</a></header>
+<main class="editor-layout"><section class="preview-area" aria-labelledby="editor-title"><div class="preview-heading">
+  <div class="preview-identity"><span class="eyebrow" id="template-kicker">BACKGROUND / 01</span><h1 id="editor-title">Mesh Gradient</h1></div>
+  <div class="preview-toolbar" aria-label="プレビュー操作">
+    <div class="segments" role="group" aria-label="プレビューの画面比率"><button type="button" class="active" data-device="desktop" aria-pressed="true">PC</button><button type="button" data-device="mobile" aria-pressed="false">スマホ</button></div>
+    <div class="preview-tool-right"><label class="inline-check"><input id="show-text" type="checkbox" checked> 文字を表示</label><button id="play" type="button" class="tool-link">一時停止</button></div>
+    <span class="render-state" id="gpu-state" aria-live="polite">準備中</span>
+  </div>
+</div>
+<div class="preview-backdrop"><div class="hero preview-surface" id="preview-canvas"><div class="thumbnail-fallback thumb-mesh"></div><div class="shader-host"></div><div class="text-vignette"></div><span class="surface-status">公式シェーダーを読み込み中…</span><div class="hero-copy"><span>BRAND MESSAGE / 2026</span><h2>新しい未来を、<br>ここから。</h2><p>可能性は、いつも創造の先にある。</p></div><span class="hero-watermark">MOTION LIBRARY / PREVIEW</span></div></div>
+<div class="preview-help"><span>カラーはHEXで自由に指定できます。</span><span>※シェーダーの表示にはネット接続が必要です。</span></div></section>
+<aside class="editor-panel" aria-label="背景を調整"><div class="panel-title"><div><div class="eyebrow">CUSTOMIZE</div><h2>背景を調整</h2></div><button type="button" id="reset" class="reset-link">初期化</button></div>
+<section class="setting-section"><div class="section-heading"><span class="section-number">01</span><h3>カラー</h3></div><p class="section-help">色をクリック、またはHEXコードを直接入力</p><div class="color-controls" id="color-controls"></div></section>
+<section class="setting-section"><div class="section-heading"><span class="section-number">02</span><h3>動き</h3></div><div class="control-range"><div class="range-top"><label for="speed">速度</label><output id="speed-val">0.35</output></div><input id="speed" type="range" min="0" max="1.8" step="0.01" value="0.35"></div><div class="control-range"><div class="range-top"><label for="strength">動きの強さ</label><output id="strength-val">0.40</output></div><input id="strength" type="range" min="0" max="1" step="0.01" value="0.4"></div></section>
+<details class="advanced"><summary>細かい調整 <span>必要な場合だけ</span></summary><div id="advanced-settings"></div></details>
+<div class="panel-actions"><button type="button" id="export-wp" class="button-primary">WordPress用HTMLを取得 <span aria-hidden="true">↗</span></button><div class="secondary-actions"><button type="button" id="save" class="button-muted">設定を保存</button><button type="button" id="load" class="button-muted">設定を読み込む</button></div><input hidden id="load-file" type="file" accept=".json,application/json"><p>編集した色と動きが埋め込み先へ反映されます。</p></div></aside></main>
+<footer class="footer"><span>Motion Library — Gallery / Editor 007</span><a href="https://github.com/paper-design/shaders" rel="noopener noreferrer" target="_blank">Engine: Paper Shaders ↗</a></footer></div><dialog id="embed-dialog" class="embed-dialog" aria-labelledby="embed-heading">
+  <div class="embed-dialog-head"><div><span class="eyebrow">EXPORT / NO PLUGIN</span><h2 id="embed-heading">クラシックエディタ用HTML</h2></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
+  <p class="embed-description">プラグイン不要。WordPressの「テキスト」タブに貼り付けます。文字・ボタンはWordPress側のHTMLとして自由に編集できます。</p>
+  <div class="export-options"><label for="publish-url">アプリの公開URL（GitHub Pages等）</label><input id="publish-url" type="url" placeholder="https://example.github.io/motion-library/" autocomplete="url" spellcheck="false"><div class="export-mode"><label><input type="radio" name="export-mode" value="with-text" checked> 背景＋文字・ボタン</label><label><input type="radio" name="export-mode" value="background"> 背景のみ</label></div></div><p id="export-warning" class="export-warning" role="status" aria-live="polite"></p><textarea id="embed-code" readonly spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
+  <div class="embed-dialog-actions"><button type="button" id="copy-embed" class="button-primary">コードをコピー <span aria-hidden="true">⧉</span></button><button type="button" id="download-test" class="button-muted">重ね表示をテスト</button></div>
+  <p class="embed-caveat">※ iframeが許可されるWordPress環境・公開HTTPS URLが必要です。外部シェーダーの読み込みとWebGL2対応が必要です。</p>
+</dialog><div class="toast" id="toast" role="status" aria-live="polite"></div></body></html>
