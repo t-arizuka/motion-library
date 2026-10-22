@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Silk Cascade — Motion Library Editor</title>
+<link rel="stylesheet" href="src/style.css">
+<style>
+/* The shared editor stylesheet above is the source of truth for the
+   header, split layout, typography, toolbar and panel controls. */
+.study-frame{position:absolute;inset:0;z-index:1;width:100%;height:100%;border:0;display:block;pointer-events:none;background:#1e1723}
+.study-hero{background:linear-gradient(135deg,#19111f,#503046 48%,#5c4753)}
+.study-hero .hero-copy{z-index:5}
+.study-hero.copy-dark .hero-copy{color:#222935;text-shadow:0 1px 16px #fffc}
+.study-hero.copy-dark .text-vignette,.study-hero.hide-copy .text-vignette{display:none}
+.study-hero.copy-dark .hero-watermark{color:#1b253999}
+.study-hero.hide-copy .hero-watermark{display:none}
+.study-hero .hero-watermark{right:18px;bottom:16px}
+.study-view-buttons{display:grid;gap:9px}
+.study-view-choice{position:relative;cursor:pointer;display:flex;gap:12px;align-items:flex-start;padding:15px 14px;border:1px solid #e0e5e9;border-radius:9px;background:#fff;transition:background .15s,border-color .15s}
+.study-view-choice:hover{border-color:#adbcc8}
+.study-view-choice:has(input:checked){border-color:#526b7c;background:#f5f8fa;box-shadow:inset 0 0 0 1px #526b7c}
+.study-view-choice input{accent-color:#304b61;margin:3px 0 0;flex:0 0 auto}
+.study-view-choice span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.study-view-choice strong{font-size:12px;font-weight:650;color:#34485a}
+.study-view-choice small{font-size:10px;color:#95a0aa;line-height:1.7}
+.study-tiny{font-size:11px;color:#91a0aa;line-height:1.8;margin:0}
+.study-text-colors{display:flex;gap:7px;flex-wrap:wrap}
+.study-text-colors button{flex:1;min-height:35px;padding:7px 12px;border-radius:7px;border:1px solid #e3e8ec;background:#fff;color:#718091;font-size:11px}
+.study-text-colors button[aria-pressed="true"]{color:#283d4d;border-color:#71899b;background:#f5f8fa;font-weight:650}
+.study-panel-title h2{font-size:23px}
+.study-caption{display:flex;align-items:center;gap:8px;font-size:11px;color:#7b8c9b;line-height:1.65}
+.study-caption::before{content:"";width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#8caaaf}
+.study-caption::after{content:"品質検証中";white-space:nowrap}
+.study-hint{font-size:11px;color:#8a98a5;line-height:1.8;margin:-2px 0 0}
+.study-review-points{margin:0;padding-left:18px;font-size:11px;line-height:1.9;color:#677684}
+.study-review-points li+li{margin-top:4px}
+.study-state{margin:8px 0 0;color:#8695a2;font-size:10px;line-height:1.7}
+.study-state.is-error{color:#a46863}
+.study-footnote{font-size:10px;line-height:1.9;color:#919ca6;margin-top:9px}
+.study-footnote a{text-decoration:underline;text-underline-offset:2px}
+.study-panel .panel-actions{margin-top:2px}
+.study-small-status{white-space:normal;max-width:230px;text-align:center;line-height:1.45}
+.study-hero .surface-status{z-index:6}
+.study-study-note{line-height:1.7;color:#83909d;font-size:10px}
+#silk-play[hidden],#motion-controls[hidden]{display:none!important}
+.study-frame{contain:strict}
+body.study-actual .editor-layout{display:block;min-height:0}
+body.study-actual .editor-panel{display:none}
+body.study-actual .preview-area{width:100%;max-width:none;padding:16px 0 28px}
+body.study-actual .preview-heading{padding-inline:clamp(18px,2.4vw,38px);margin-bottom:16px}
+body.study-actual .preview-backdrop{height:clamp(320px,70vh,760px);padding:0;min-height:0;border:0;border-radius:0;background:transparent}
+body.study-actual .hero{box-shadow:none;border-radius:0;transition:none}
+body.study-actual .preview-help{padding-inline:clamp(18px,2.4vw,38px)}
+body.study-actual .hero.mobile{width:min(390px,100%);height:100%}
+body.study-actual .preview-backdrop:has(.hero.mobile){height:844px}
+body.study-actual .header-back::before{content:""}
+body.study-actual .footer{margin-top:auto}
+@media(max-width:780px){
+ .study-panel .panel-actions{padding-top:12px}
+ .study-hero .hero-copy p{line-height:1.7}
+}
+@media(max-width:650px){
+ .study-small-status{display:none}
+ body.study-actual .preview-heading{padding-inline:16px}
+}
+@media(max-width:430px){
+ .study-hero .hero-copy{top:32%}
+ .study-hero.mobile .hero-copy{top:36%}
+ .study-hero .hero-copy h2{font-size:27px}
+ .study-text-colors button{min-width:65px}
+ body.study-actual .hero.mobile{width:min(390px,100%)}
+}
+@media(prefers-reduced-motion:reduce){.study-view-choice{transition:none}}
+
+/* Material controls: the same fields and range style as the main editor. */
+.study-panel .color-controls{gap:11px}
+.study-panel .color-name{font-size:11px}
+.study-panel .color-control .hex-input{width:89px;font-size:11px}
+.study-panel .control-range{margin-bottom:19px}
+.study-panel .control-range:last-child{margin-bottom:0}
+.study-color-note,.study-material-note{font-size:10px;line-height:1.75;color:#99a4ae;margin:10px 0 0}
+.study-panel .setting-section{padding-block:19px}
+.study-panel .panel-title{margin-bottom:4px}
+.study-panel .study-view-choice{padding:12px}
+.study-panel .study-view-buttons{gap:7px}
+.study-panel .study-view-choice small{line-height:1.45}
+.study-panel .study-view-choice span{gap:4px}
+.study-panel .color-field label{cursor:default}
+.study-panel .color-control input:focus-visible,
+.study-panel .study-text-colors button:focus-visible{outline:2px solid #526b80;outline-offset:2px}
+.study-panel .study-quality{border-top:1px solid #edf0f2;padding:18px 0 0}
+.study-quality>summary{display:flex;align-items:center;cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:#586674}
+.study-quality>summary::-webkit-details-marker{display:none}
+.study-quality>summary::before{content:'＋';font-size:15px;color:#8998a5;margin-right:8px}
+.study-quality[open]>summary::before{content:'−'}
+.study-quality .study-review-points{padding-top:12px}
+.study-panel .study-locked-note{font-size:10px;line-height:1.7;color:#8998a5;background:#f7f9fa;border-radius:7px;padding:10px 12px;margin:15px 0 0}
+.study-compare-tip{font-size:10px;line-height:1.7;color:#8996a3;margin:9px 0 0}
+.study-panel .advanced{padding-block:16px}
+
+
+/* Approved collection editor: same shared editor surfaces, without study badges. */
+.study-panel .panel-actions{margin-top:auto}
+body.study-actual .preview-backdrop{height:clamp(320px,70vh,760px)}
+body.study-actual .preview-area{max-width:100%}
+#open-large-preview{width:100%;text-align:left}
+#silk-toast{pointer-events:none}
+.silk-preview-width-note{color:#98a3ad;font-size:10px}
+</style>
+</head>
+<body data-page="editor">
+<div class="shell">
+<header class="header">
+  <a class="wordmark" href="index.html" aria-label="Motion Library 一覧へ"><span class="mark"><b></b><b></b><b></b></span><span>motion<span>library</span></span></a>
+  <span class="header-label">EDITOR / SILK CASCADE</span>
+  <a class="header-back" id="back-link" href="index.html">← 一覧へ戻る</a>
+</header>
+<main class="editor-layout">
+  <section class="preview-area" aria-labelledby="study-title">
+    <div class="preview-heading">
+      <div class="preview-identity">
+        <span class="eyebrow" id="study-kicker">BACKGROUND / 03</span>
+        <h1 id="study-title">Silk Cascade</h1>
+      </div>
+      <div class="preview-toolbar" aria-label="プレビュー操作">
+        <div class="segments" role="group" aria-label="プレビューの画面比率">
+          <button type="button" data-device="desktop" class="active" aria-pressed="true">PC</button>
+          <button type="button" data-device="mobile" aria-pressed="false">スマホ</button>
+        </div>
+        <div class="preview-tool-right">
+          <label class="inline-check"><input id="show-text" type="checkbox" checked> 文字を表示</label>
+          <button type="button" id="silk-play" class="tool-link" aria-label="シルクの動きを一時停止する" aria-pressed="true">一時停止</button>
+        </div>
+        <span class="render-state study-small-status" id="gpu-status" aria-live="polite">描画を確認中</span>
+      </div>
+    </div>
+    <div class="preview-backdrop">
+      <div class="hero preview-surface study-hero" id="study-hero">
+        <iframe class="study-frame" id="study-frame" src="embed/silk/v1/shader.html" loading="eager" title="Silk Cascade WebGL"></iframe>
+        <div class="text-vignette"></div>
+        <span class="surface-status" id="shader-loading">WebGLシェーダーを確認中…</span>
+        <div class="hero-copy">
+          <span>BRAND MESSAGE / 2026</span>
+          <h2>新しい未来を、<br>ここから。</h2>
+          <p>可能性は、いつも創造の先にある。</p>
+        </div>
+        <span class="hero-watermark">MOTION LIBRARY / SILK CASCADE</span>
+      </div>
+    </div>
+    <div class="preview-help"><span>シルクの動き・色・光沢を編集できます。</span><span>WordPress用コードには現在の編集値が反映されます。</span></div>
+  </section>
+  <aside class="editor-panel study-panel" aria-label="Silk Cascadeの背景を調整">
+    <div class="panel-title study-panel-title">
+      <div><div class="eyebrow">CUSTOMIZE</div><h2>シルクを調整</h2></div>
+      <button type="button" class="reset-link" id="reset-study" title="選択中の作品の色と素材感を初期値に戻します">初期化</button>
+    </div>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">01</span><h3>カラー</h3></div>
+      <p class="section-help">色をクリック、またはHEXコードを直接入力</p>
+      <div class="color-controls" id="study-colors"></div>
+      <p class="study-color-note">布の陰影・ハイライトを残したまま色を変更します。</p>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">02</span><h3>素材感</h3></div>
+      <div id="study-material"></div>
+      <p class="study-material-note">素材の反射や重なりは停止中も調整できます。</p>
+    </section>
+    <section class="setting-section" id="motion-controls">
+      <div class="section-heading"><span class="section-number">03</span><h3>動き</h3></div>
+      <div id="study-motion"></div>
+      <p class="study-material-note">速度は流れる速さ、揺れ幅はゆったりした移動、なめらかさは細かな折り目の出方を調整します。</p>
+    </section>
+    <section class="setting-section display-size-section">
+      <div class="section-heading"><span class="section-number">04</span><h3>表示サイズ</h3></div>
+      <div class="display-size-fields">
+        <label>最大幅
+          <select id="width-mode" class="size-mode-select" aria-label="最大幅の指定方法"><option value="fluid">100%（標準）</option><option value="fixed">px指定</option></select>
+          <span id="fixed-width-control" class="unit-input" hidden>
+            <input id="max-width" type="number" min="320" max="2560" step="10" value="1440" aria-label="最大幅（ピクセル）"><span>px</span>
+          </span>
+        </label>
+        <label>最大高さ
+          <span class="unit-input"><input id="max-height" type="number" min="360" max="1200" step="10" value="760" aria-label="最大高さ（ピクセル）"><span>px</span></span>
+        </label>
+      </div>
+      <p class="size-note">設定値を超えず、画面幅に合わせて縮小します。</p>
+      <button type="button" class="actual-preview-button" id="open-large-preview">実寸プレビュー <span aria-hidden="true">↗</span></button>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">05</span><h3>文字の見え方</h3></div>
+      <div class="study-text-colors" role="group" aria-label="文字色を選択">
+        <button type="button" data-copy="white" aria-pressed="true">白文字</button>
+        <button type="button" data-copy="dark" aria-pressed="false">黒文字</button>
+      </div>
+      <p class="study-hint" style="margin-top:11px">上部の「文字を表示」で文字なしの構図も確認できます。</p>
+    </section>
+    <details class="advanced"><summary>ライセンスと注意事項 <span>必要な場合だけ</span></summary>
+      <p class="study-footnote">RadiantのSilk Cascade（MIT）をベースに、色・光沢・動きを調整できるWebGL版として収録しています。</p>
+      <p class="study-footnote"><a href="https://radiant-shaders.com/shader/silk-cascade" target="_blank" rel="noopener noreferrer">Radiant公式デモ ↗</a></p>
+    </details>
+    <div class="panel-actions">
+      <button type="button" id="export-wp" class="button-primary">WordPress用HTMLを取得 <span aria-hidden="true">↗</span></button>
+      <div class="secondary-actions">
+        <button type="button" id="save-settings" class="button-muted">設定を保存</button>
+        <button type="button" id="load-settings" class="button-muted">設定を読み込む</button>
+      </div>
+      <input id="load-file" type="file" accept=".json,application/json" hidden>
+      <p>色・動きと表示サイズをHTMLへ反映します。WordPress側の文字・ボタンは編集できます。</p>
+      <p class="study-state" id="study-state" aria-live="polite">Silk Cascade — WebGL</p>
+    </div>
+  </aside>
+</main>
+<footer class="footer"><span>Motion Library — Silk Cascade / Editor 014</span><span>Radiant / MIT · © 2025 Paul Bakaus</span></footer>
+</div>
+<dialog id="embed-dialog" class="embed-dialog export-dialog-v2" aria-labelledby="embed-heading">
+  <div class="embed-dialog-head"><div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">クラシックエディタの「テキスト」タブに貼り付けます。専用プラグインは不要です。</p></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
+  <section class="export-section" aria-labelledby="export-mode-heading">
+    <div class="export-section-title"><span class="export-step">01</span><h3 id="export-mode-heading">出力する内容</h3></div>
+    <div class="export-choice-grid">
+      <label class="export-choice"><input type="radio" name="export-mode" value="with-text" checked><span><strong>MVセット</strong><small>WordPress側で文字・ボタンも編集</small></span></label>
+      <label class="export-choice"><input type="radio" name="export-mode" value="background"><span><strong>背景のみ</strong><small>既存テーマの文字の背面に配置</small></span></label>
+    </div>
+  </section>
+  <section class="export-section export-host-section" aria-labelledby="export-host-heading">
+    <div class="export-section-title"><span class="export-step">02</span><h3 id="export-host-heading"><label for="publish-url">配信元URL</label></h3></div>
+    <input id="publish-url" type="url" placeholder="https://motion.example.com/" autocomplete="url" spellcheck="false" aria-describedby="source-privacy">
+    <p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p>
+  </section>
+  <div class="export-output-summary" aria-live="polite">
+    <div><span>背景</span><strong id="export-template-name">Silk Cascade</strong></div>
+    <div><span>出力サイズ</span><strong id="export-dimensions">幅100% / 高さ最大760px</strong></div>
+  </div>
+  <p id="export-warning" class="export-warning" role="status" aria-live="polite"></p>
+  <div class="embed-dialog-actions">
+    <button type="button" id="copy-embed" class="button-primary">WordPress用HTMLをコピー <span aria-hidden="true">⧉</span></button>
+    <button type="button" id="download-test" class="button-muted">実寸プレビュー ↗</button>
+  </div>
+  <details class="export-code-details"><summary>生成コードを見る <span>必要な場合だけ</span></summary><textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea></details>
+  <p class="embed-caveat">※ 公開HTTPS URL・iframeを許可するWordPress環境が必要です。既存テーマに重ねる場合は配置調整が必要です。</p>
+</dialog>
+<div class="toast" id="silk-toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const params = new URLSearchParams(location.search);
+  const variants = {
+    cascade:{
+      title:'Silk Cascade',src:'embed/silk/v1/shader.html',number:'03',
+      colors:[
+        {key:'col1',label:'奥のシルク',value:'#806126'},
+        {key:'col2',label:'中間のシルク',value:'#6B2E38'},
+        {key:'col3',label:'手前のシルク',value:'#4D3873'},
+        {key:'background',label:'背景',value:'#0E0813'}
+      ],
+      sliders:[
+        {key:'sheen',label:'光沢の強さ',min:.3,max:2,step:.05,value:1},
+        {key:'layerOpacity',label:'布の重なり',min:.55,max:1.35,step:.05,value:1}
+      ],
+      motion:[
+        {key:'speed',label:'速度',min:0.1,max:1.5,step:0.05,value:0.4},
+        {key:'sway',label:'揺れ幅',min:0,max:1,step:0.05,value:0.35},
+        {key:'smoothness',label:'流れのなめらかさ',min:0,max:1,step:0.05,value:0}
+      ]
+    },
+    groove:{
+      title:'Silk Groove',src:'silk-groove-static.html',number:'02',
+      colors:[
+        {key:'col1',label:'布の暗部',value:'#521217'},
+        {key:'col2',label:'布のゴールド',value:'#B38029'},
+        {key:'col3',label:'ハイライト',value:'#FFE08C'}
+      ],
+      sliders:[
+        {key:'foldDepth',label:'ひだの深さ',min:.5,max:1.6,step:.05,value:1},
+        {key:'gloss',label:'光沢の強さ',min:.3,max:1.8,step:.05,value:1}
+      ]
+    }
+  };
+  const hexOK = /^#[0-9a-fA-F]{6}$/;
+  const defaults=key=>({
+    colors:Object.fromEntries(variants[key].colors.map(x=>[x.key,x.value])),
+    material:Object.fromEntries(variants[key].sliders.map(x=>[x.key,x.value])),
+    motion:Object.fromEntries((variants[key].motion||[]).map(x=>[x.key,x.value]))
+  });
+  const values={cascade:defaults('cascade'),groove:defaults('groove')};
+  const $=id=>document.getElementById(id);
+  const state={
+    shader:'cascade',
+    device:params.get('device')==='mobile'?'mobile':'desktop',
+    text:params.get('text')!=='0',
+    color:params.get('color')==='dark'?'dark':'white',
+    playing:params.get('play')==='1'||(params.get('play')!=='0'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  };
+  const actual=params.get('view')==='actual';
+  const hero=$('study-hero'),frame=$('study-frame'),gpu=$('gpu-status'),loading=$('shader-loading');
+  let pollTimer=0, pollCount=0, requestSeq=0;
+  // Pass material settings into the separate large-size review page without storing personal data.
+  try{
+    const raw=params.get('settings');
+    if(raw&&raw.length<1800){
+      const parsed=JSON.parse(raw);
+      for(const key of Object.keys(variants)){
+        const p=parsed[key];
+        if(!p||typeof p!=='object')continue;
+        for(const entry of variants[key].colors){
+          const v=p.colors?.[entry.key];
+          if(typeof v==='string'&&hexOK.test(v))values[key].colors[entry.key]=v.toUpperCase();
+        }
+        for(const entry of variants[key].sliders){
+          const v=p.material?.[entry.key];
+          if(typeof v==='number'&&Number.isFinite(v)&&v>=entry.min&&v<=entry.max){
+            values[key].material[entry.key]=Math.round(v/entry.step)*entry.step;
+          }
+        }
+        for(const entry of variants[key].motion||[]){
+          const v=p.motion?.[entry.key];
+          if(typeof v==='number'&&Number.isFinite(v)&&v>=entry.min&&v<=entry.max){
+            values[key].motion[entry.key]=Math.round(v/entry.step)*entry.step;
+          }
+        }
+      }
+    }
+  }catch(e){/* Invalid review URL settings fall back to originals. */}
+  const getReady=()=>{try{return frame.contentDocument?.documentElement?.dataset?.studyReady==='true'}catch(e){return false}};
+  function sendSettings(){
+    if(!frame.contentWindow)return;
+    try{localStorage.setItem('motion-library-silk-editor-v1',JSON.stringify(values.cascade))}catch(e){}
+    const settings=values[state.shader];
+    frame.contentWindow.postMessage({
+      type:'motion-silk-study-settings',colors:settings.colors,...settings.material,
+      ...(state.shader==='cascade'?{...settings.motion,playing:state.playing}:{})
+    },location.origin);
+  }
+  function watchFrame(){
+    clearTimeout(pollTimer);pollCount=0;const seq=++requestSeq;
+    loading.hidden=false;loading.textContent='WebGLシェーダーを確認中…';
+    gpu.textContent='描画を確認中';gpu.classList.remove('ready','error');
+    function poll(){
+      if(seq!==requestSeq)return;
+      if(getReady()){
+        loading.hidden=true;gpu.textContent='WebGL 描画完了';gpu.classList.add('ready');
+        $('study-state').textContent='Silk Cascade — WebGLを読み込みました。';
+        return;
+      }
+      if(++pollCount<28){pollTimer=setTimeout(poll,150);return}
+      loading.hidden=false;loading.textContent='WebGL描画を確認できません。ブラウザのGPU設定をご確認ください。';
+      gpu.textContent='描画未確認';gpu.classList.add('error');
+      $('study-state').textContent='このブラウザではWebGLの描画完了を確認できませんでした。';
+    }
+    pollTimer=setTimeout(poll,150);
+  }
+  frame.addEventListener('load',()=>{watchFrame();sendSettings()});
+  function renderControls(){
+    const def=variants[state.shader],item=values[state.shader];
+    $('study-colors').innerHTML=def.colors.map(c=>
+      '<div class="color-field"><label class="color-name" for="study-color-'+c.key+'">'+c.label+'</label>'+
+      '<div class="color-control"><input type="color" data-silk-color="'+c.key+'" id="study-color-'+c.key+'" value="'+item.colors[c.key]+'" aria-label="'+c.label+'の色">'+
+      '<input type="text" class="hex-input" data-silk-hex="'+c.key+'" value="'+item.colors[c.key]+'" maxlength="7" spellcheck="false" aria-label="'+c.label+'のHEXコード"></div></div>'
+    ).join('');
+    $('study-material').innerHTML=def.sliders.map(s=>
+      '<div class="control-range"><div class="range-top"><label for="study-range-'+s.key+'">'+s.label+'</label>'+
+      '<output id="study-out-'+s.key+'">'+Number(item.material[s.key]).toFixed(2)+'</output></div>'+
+      '<input type="range" id="study-range-'+s.key+'" data-silk-range="'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+item.material[s.key]+'"></div>'
+    ).join('');
+    $('study-motion').innerHTML=(def.motion||[]).map(s=>
+      '<div class="control-range"><div class="range-top"><label for="study-motion-'+s.key+'">'+s.label+'</label>'+
+      '<output id="study-motion-out-'+s.key+'">'+Number(item.motion[s.key]).toFixed(2)+'</output></div>'+
+      '<input type="range" id="study-motion-'+s.key+'" data-silk-motion="'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+item.motion[s.key]+'"></div>'
+    ).join('');
+    $('study-motion').querySelectorAll('[data-silk-motion]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkMotion;
+      item.motion[key]=Number(input.value);
+      $('study-motion-out-'+key).textContent=Number(input.value).toFixed(2);
+      sendSettings();
+    }));
+    $('study-colors').querySelectorAll('[data-silk-color]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkColor;
+      item.colors[key]=input.value.toUpperCase();
+      $('study-colors').querySelector('[data-silk-hex="'+key+'"]').value=item.colors[key];
+      sendSettings();
+    }));
+    $('study-colors').querySelectorAll('[data-silk-hex]').forEach(input=>{
+      const key=input.dataset.silkHex;
+      const commit=()=>{
+        const v=input.value.trim().toUpperCase();
+        if(hexOK.test(v)){
+          item.colors[key]=v;
+          $('study-colors').querySelector('[data-silk-color="'+key+'"]').value=v;
+          input.classList.remove('invalid');sendSettings();
+        }else input.classList.add('invalid');
+      };
+      input.addEventListener('input',()=>{
+        if(hexOK.test(input.value.trim()))commit();
+        else input.classList.toggle('invalid',input.value.trim().length>=7);
+      });
+      input.addEventListener('blur',()=>{
+        if(!hexOK.test(input.value.trim())){input.value=item.colors[key];input.classList.remove('invalid')}
+      });
+      input.addEventListener('change',commit);
+    });
+    $('study-material').querySelectorAll('[data-silk-range]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkRange;
+      item.material[key]=Number(input.value);
+      $('study-out-'+key).textContent=Number(input.value).toFixed(2);
+      sendSettings();
+    }));
+  }
+  function render(){
+    $('study-title').textContent=variants[state.shader].title;
+    $('study-kicker').textContent='BACKGROUND / 03';
+    const src=variants[state.shader].src;
+    if(frame.getAttribute('src')!==src){
+      frame.title=variants[state.shader].title+' 静止WebGL';
+      frame.setAttribute('src',src);
+      watchFrame();
+    }else sendSettings();
+    hero.classList.toggle('mobile',state.device==='mobile');
+    hero.classList.toggle('hide-copy',!state.text);
+    hero.classList.toggle('copy-dark',state.color==='dark');
+    $('show-text').checked=state.text;
+    $('motion-controls').hidden=state.shader!=='cascade';
+    const play=$('silk-play');
+    play.hidden=state.shader!=='cascade';
+    play.textContent=state.playing?'一時停止':'再生';
+    play.setAttribute('aria-pressed',String(state.playing));
+    play.setAttribute('aria-label',state.playing?'シルクの動きを一時停止する':'シルクの動きを再生する');
+    document.querySelectorAll('[data-device]').forEach(btn=>{
+      const on=btn.dataset.device===state.device;
+      btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',String(on));
+    });
+    document.querySelectorAll('[data-copy]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.copy===state.color)));
+    document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.checked=el.value===state.shader);
+    renderControls();
+  }
+  document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.device=btn.dataset.device;render();
+  }));
+  document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.color=btn.dataset.copy;render();
+  }));
+  document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.addEventListener('change',()=>{
+    if(el.checked){state.shader=el.value;render()}
+  }));
+  $('show-text').addEventListener('change',e=>{state.text=e.target.checked;render()});
+  $('silk-play').addEventListener('click',()=>{
+    if(state.shader!=='cascade')return;
+    state.playing=!state.playing;
+    render();
+  });
+  $('reset-study').addEventListener('click',()=>{
+    if(!window.confirm('Silk Cascadeの色と設定を初期値に戻しますか？'))return;
+    values.cascade=defaults('cascade');
+    layout={maxWidth:null,maxHeight:760};persistLayout();applyLayout();
+    render();notify('初期値に戻しました');
+  });
+  function reviewURL(view){
+    const u=new URL(location.href);
+    u.searchParams.set('view',view);
+    u.searchParams.set('shader',state.shader);
+    u.searchParams.set('device',state.device);
+    u.searchParams.set('text',state.text?'1':'0');
+    u.searchParams.set('color',state.color);
+    u.searchParams.set('play',state.playing?'1':'0');
+    u.searchParams.set('settings',JSON.stringify(values));
+    u.searchParams.set('w',layout.maxWidth===null?'100%':String(layout.maxWidth));
+    u.searchParams.set('h',String(layout.maxHeight));
+    return u.href;
+  }
+  $('open-large-preview').addEventListener('click',()=>{
+    window.open(reviewURL('actual'),'_blank','noopener');
+  });
+  if(actual){
+    document.body.classList.add('study-actual');
+    $('back-link').href=reviewURL('editor');
+    $('back-link').textContent='← 調整画面へ戻る';
+  }
+
+  // WordPress dimensions use the exact same sizing contract as the Mesh/Grain editors.
+  const PUBLISH_KEY='ml-publish-base',STORAGE_KEY='motion-library-silk-editor-v1',SIZE_KEY='motion-library-silk-size-v1';
+  const LAYOUT_DEFAULT={maxWidth:null,maxHeight:760};
+  let layout={...LAYOUT_DEFAULT};
+  function validateLayout(input){
+    if(!input||typeof input!=='object')throw Error('表示サイズが不正です');
+    if(input.maxWidth!==null&&(!Number.isInteger(input.maxWidth)||input.maxWidth<320||input.maxWidth>2560))throw Error('最大幅は320〜2560pxで指定してください');
+    if(!Number.isInteger(input.maxHeight)||input.maxHeight<360||input.maxHeight>1200)throw Error('最大高さは360〜1200pxで指定してください');
+    return {maxWidth:input.maxWidth,maxHeight:input.maxHeight};
+  }
+  function validateSettings(input){
+    if(!input||typeof input!=='object')throw Error('設定値が不正です');
+    const output=defaults('cascade');
+    for(const c of variants.cascade.colors){
+      const v=input.colors?.[c.key];
+      if(typeof v!=='string'||!hexOK.test(v))throw Error(c.label+'のカラーが不正です');
+      output.colors[c.key]=v.toUpperCase();
+    }
+    for(const [group,fields] of [['material',variants.cascade.sliders],['motion',variants.cascade.motion]]){
+      for(const f of fields){
+        const v=input[group]?.[f.key];
+        if(typeof v!=='number'||!Number.isFinite(v)||v<f.min||v>f.max)throw Error(f.label+'が範囲外です');
+        output[group][f.key]=v;
+      }
+    }
+    return output;
+  }
+  function notify(message){
+    const t=$('silk-toast');t.textContent=message;t.classList.add('visible');
+    clearTimeout(notify.t);notify.t=setTimeout(()=>t.classList.remove('visible'),2800);
+  }
+  function persistLayout(){try{localStorage.setItem(SIZE_KEY,JSON.stringify(layout))}catch(e){}}
+  function applyLayout(){
+    $('width-mode').value=layout.maxWidth===null?'fluid':'fixed';
+    $('fixed-width-control').hidden=layout.maxWidth===null;
+    if(layout.maxWidth!==null)$('max-width').value=layout.maxWidth;
+    $('max-height').value=layout.maxHeight;
+    if(actual){
+      const backdrop=document.querySelector('.preview-backdrop');
+      backdrop.style.height='clamp(320px,70vh,'+layout.maxHeight+'px)';
+      backdrop.style.maxWidth=layout.maxWidth===null?'100%':layout.maxWidth+'px';
+      backdrop.style.marginInline='auto';
+      // The same clamp is used by WordPress even in mobile inspection mode.
+    }else{
+      const backdrop=document.querySelector('.preview-backdrop');
+      backdrop.style.maxWidth=layout.maxWidth===null?'100%':layout.maxWidth+'px';
+      backdrop.style.marginInline='auto';
+    }
+  }
+  try{
+    const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+    if(stored)values.cascade=validateSettings(stored);
+  }catch(e){console.warn('Silkの保存設定を読み込めません',e)}
+  try{layout=validateLayout(JSON.parse(localStorage.getItem(SIZE_KEY)||'null'))}
+  catch(e){layout={...LAYOUT_DEFAULT}}
+  if(actual){
+    try{const w=params.get('w'),h=params.get('h');layout=validateLayout({maxWidth:w==='100%'?null:Number(w),maxHeight:Number(h)})}catch(e){}
+  }
+  applyLayout();
+  $('width-mode').addEventListener('change',()=>{
+    if($('width-mode').value==='fluid')layout.maxWidth=null;
+    else{
+      const v=Number($('max-width').value);
+      layout.maxWidth=Number.isInteger(v)&&v>=320&&v<=2560?v:1440;
+    }
+    persistLayout();applyLayout();
+  });
+  $('max-width').addEventListener('change',()=>{
+    const v=Number($('max-width').value);
+    if(layout.maxWidth!==null&&Number.isFinite(v)){
+      layout.maxWidth=Math.max(320,Math.min(2560,Math.round(v)));
+      persistLayout();
+    }
+    applyLayout();
+  });
+  $('max-height').addEventListener('change',()=>{
+    const v=Number($('max-height').value);
+    if(Number.isFinite(v)){
+      layout.maxHeight=Math.max(360,Math.min(1200,Math.round(v)));
+      persistLayout();
+    }
+    applyLayout();
+  });
+  // In the full editor, settings persist; the study preview remains isolated.
+  // load() only restores the saved setting; future changes persist through sendSettings().
+
+  const publish=$('publish-url'),dialog=$('embed-dialog');
+  try{publish.value=localStorage.getItem(PUBLISH_KEY)||new URL('.',location.href).href}catch(e){}
+  function baseUrl(raw){
+    let u;try{u=new URL(String(raw||'').trim())}catch(e){throw Error('公開HTTPSの配信URLを入力してください')}
+    if(u.protocol!=='https:'||u.username||u.password||u.hash||u.search)throw Error('https:// で始まる公開URLを指定してください');
+    if(['localhost','127.0.0.1','github.com','raw.githubusercontent.com'].includes(u.hostname.toLowerCase()))throw Error('公開された配信URLを指定してください');
+    u.pathname=u.pathname.replace(/\/(?:index|editor|silk|preview)\.html$/i,'/').replace(/\/$/,'')+'/';
+    return u;
+  }
+  function encodeSilk(){
+    const cfg={schemaVersion:1,template:'silk-cascade',settings:validateSettings(values.cascade)};
+    return btoa(JSON.stringify(cfg)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function iframeEmbed(mode){
+    if(mode!=='with-text'&&mode!=='background')throw Error('出力形式が不正です');
+    const u=new URL('embed/silk/v1/index.html',baseUrl(publish.value));
+    u.searchParams.set('data',encodeSilk());
+    const w=layout.maxWidth===null?'100%':layout.maxWidth+'px',bg=values.cascade.colors.background;
+    const open='<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:'+w+';margin:0 auto;height:clamp(320px,70vh,'+layout.maxHeight+'px);overflow:hidden;background:'+bg+'">';
+    const frame='<iframe title="Motion Library Silk Cascade 背景" aria-hidden="true" tabindex="-1" loading="eager" src="'+u.href.replace(/&/g,'&amp;')+'" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>';
+    if(mode==='background')return open+frame+'</div>';
+    const copy='<div class="motion-library-mv-content" style="position:relative;z-index:1;height:100%;min-height:0;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>';
+    return open+frame+copy+'</div>';
+  }
+  function refreshExport(){
+    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    $('export-template-name').textContent='Silk Cascade';
+    $('export-dimensions').textContent=(layout.maxWidth===null?'幅100%':'最大幅'+layout.maxWidth+'px')+' / 高さ最大'+layout.maxHeight+'px';
+    try{
+      $('embed-code').value=iframeEmbed(mode);
+      const b=baseUrl(publish.value),personal=b.hostname.toLowerCase().endsWith('.github.io');
+      $('source-privacy').classList.toggle('is-personal-host',personal);
+      $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。正式納品前に配信元URLを変更してください。':'この公開配信URLが埋め込みHTMLに記載されます。';
+      $('export-warning').textContent=mode==='background'?'背景だけのコードです。文字はWordPress側で重ねてください。':'キャッチコピーとボタンはWordPress側で編集できます。';
+      $('copy-embed').disabled=false;
+      try{localStorage.setItem(PUBLISH_KEY,b.href)}catch(e){}
+    }catch(e){
+      $('embed-code').value='';$('copy-embed').disabled=true;
+      $('source-privacy').textContent='公開されたHTTPSの配信URLを入力してください。';
+      $('export-warning').textContent=e.message;
+    }
+  }
+  $('export-wp').addEventListener('click',()=>{refreshExport();dialog.showModal()});
+  publish.addEventListener('input',refreshExport);
+  document.querySelectorAll('input[name="export-mode"]').forEach(el=>el.addEventListener('change',refreshExport));
+  $('close-embed').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+  $('copy-embed').addEventListener('click',async()=>{
+    const content=$('embed-code').value;if(!content)return;
+    try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(content);notify('WordPress用HTMLをコピーしました');return}}catch(e){}
+    const detail=document.querySelector('.export-code-details');
+    if(detail&&!detail.open)detail.open=true;
+    $('embed-code').focus();$('embed-code').select();
+    if(document.execCommand('copy'))notify('WordPress用HTMLをコピーしました');
+    else notify('Ctrl+Cでコピーしてください');
+  });
+  $('download-test').addEventListener('click',()=>{
+    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    const u=new URL(reviewURL('actual'));
+    u.searchParams.set('text',mode==='with-text'?'1':'0');
+    window.open(u.href,'_blank','noopener');
+  });
+  $('save-settings').addEventListener('click',()=>{
+    const obj={schemaVersion:1,template:'silk-cascade',settings:validateSettings(values.cascade),layout:validateLayout(layout)};
+    const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='motion-silk-cascade-settings.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);notify('設定を保存しました');
+  });
+  $('load-settings').addEventListener('click',()=>$('load-file').click());
+  $('load-file').addEventListener('change',async event=>{
+    const f=event.target.files?.[0];if(!f)return;
+    try{
+      if(f.size>64000)throw Error('設定ファイルが大きすぎます');
+      const data=JSON.parse(await f.text());
+      if(data.schemaVersion!==1||data.template!=='silk-cascade')throw Error('Silk Cascadeの設定ファイルを選んでください');
+      const next=validateSettings(data.settings);
+      const nextSize=data.layout?validateLayout(data.layout):{...LAYOUT_DEFAULT};
+      values.cascade=next;layout=nextSize;persistLayout();applyLayout();render();notify('設定を読み込みました');
+    }catch(e){notify('読み込みエラー: '+(e.message||e))}
+    finally{event.target.value=''}
+  });
+
+  render();watchFrame();
+  window.addEventListener('pagehide',()=>clearTimeout(pollTimer));
+})();
+</script>
+</body>
+</html>
