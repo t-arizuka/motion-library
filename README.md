@@ -1,29 +1,51 @@
 # Motion Library
 
-WordPressのメインビジュアル向け抽象アニメーション背景ライブラリ。Mesh Gradient / Grain Gradient の一覧・編集・iframe埋め込み用HTMLを収録します。
+WordPressのメインビジュアル向け抽象WebGLアニメーション背景ライブラリ。
+現在の収録作品：**Mesh Gradient / Grain Gradient / Silk Cascade**（3種類）。
 
-## 現状
+## 現状（2026-10-22）
 
-- 008版の**試験用ソース**。描画品質の実GPU検証、実際のWordPressクラシックエディタへの設置、公開URLでの動作は**未検証**です。
-- リポジトリは **Private** です。デプロイ先は未決定で、Netlify / Vercel / Railway 等の静的ホスティングを検討します。
-- WordPress専用プラグイン不要。背景はiframe、文字・ボタンはWordPress側のHTMLで編集します。ただしiframeを許可する権限・テーマ側の位置調整が必要です。
-- アニメーションは外部CDNの `@paper-design/shaders@0.0.78` に依存し、WebGL2対応ブラウザが必要です。シェーダー自体は同梱していません。
+- 開発・レビューの公開先：**GitHub Pages**、リポジトリは**Public**。Vercelへの移行は会社の承認待ちのため行わない。
+- **Silk Cascadeの静止ビジュアルとアニメーション品質はユーザーが承認済み**。正式エディタとWordPress出力機能を追加済み。
+- ブラウザ上の最終WebGL表示・実際のWordPressクラシックエディタでの設置・保存・スマホ表示は**この実装作業からは未検証**。納品品質の運用検証は別途必要。
+- 背景はiframe、文字とボタンはWordPress側の通常HTMLで編集。WordPressがiframeを許可する権限・設定であることが必要。
+
+## 入口
+
+- [ギャラリー](https://t-arizuka.github.io/motion-library/)
+- [Mesh Gradient エディタ](https://t-arizuka.github.io/motion-library/editor.html?template=mesh)
+- [Grain Gradient エディタ](https://t-arizuka.github.io/motion-library/editor.html?template=grain)
+- [Silk Cascade エディタ](https://t-arizuka.github.io/motion-library/silk.html)
+- [Silk Cascade / Silk Groove 比較研究](https://t-arizuka.github.io/motion-library/studies/silk-material-001/)
 
 ## ファイル
 
-- `index.html` — アニメーション一覧
-- `editor.html?template=mesh` / `?template=grain` — 編集画面
-- `src/app.js`, `src/style.css` — ソースコード
-- `embed/v1/index.html` — WordPress用背景レンダラー（バージョン固定）
-- `open.html`, `edit.html` — 単体HTML版
-- `WP_CLASSIC_TEST_CHECKLIST.md` — WordPress確認項目
-- `LICENSE_NOTES.md` — 外部シェーダーのライセンス
+- `index.html` — 正式ギャラリー（3作品）
+- `editor.html`, `src/app.js`, `src/style.css` — Mesh / Grainの既存エディタと共通スタイル
+- `silk.html` — Silk Cascadeの正式編集画面。同じヘッダー・2カラム・HTML書き出しUI。
+- `embed/v1/index.html` — Mesh / Grain用の互換性維持レンダラー。**既存仕様は変更しない。**
+- `embed/silk/v1/index.html` — Silk Cascade用のバージョン固定レンダラー。設定を検証しiframe描画。
+- `embed/silk/v1/shader.html` — 配信版SilkのWebGLシェーダー。原作Radiant（MIT）を改変。
+- `embed/silk/v1/LICENSE-RADIANT.txt` — Silkの上流MITライセンス。
+- `WP_CLASSIC_TEST_CHECKLIST.md` — WordPress現場検証手順
+- `LICENSE_NOTES.md` — 外部ライブラリと著作権表記
 
-## 公開・検証
+## Silk CascadeのWordPress利用
 
-配信前に必ず実ブラウザでWebGL描画、設定反映、iframe重ね表示、クラシックエディタ保存後のHTML維持、スマホ表示を検証してください。公開されたJavaScriptはブラウザから取得可能です。ソースのGitHubリポジトリがPrivateでも、**配信したフロントエンドコードが秘密になるわけではありません**。
+1. `silk.html` を開き、4色の布と背景、光沢、重なり、速度、揺れ幅、なめらかさを調整。
+2. 表示サイズは標準で幅100%・高さ最大760px（CSS `clamp(320px,70vh,760px)`）。必要なら幅320〜2560px・高さ360〜1200pxを指定。
+3. 「WordPress用HTMLを取得」を開き、「MVセット」または「背景のみ」を選択。公開HTTPSの配信元URLを確認。
+4. 「WordPress用HTMLをコピー」→ クラシックエディタの「テキスト」タブに貼り付け。WordPressの保存後もiframeが残るか必ず確認。
+5. 原作のライセンスは `embed/silk/v1/LICENSE-RADIANT.txt` を同梱。正式運用時も保持。
 
-公開先を決めてから公開設定を行います。誤配信防止のため、本リポジトリにはデプロイ設定や認証情報を含めません。
+Silk Cascadeの設定は `schemaVersion:1` + `template:"silk-cascade"` + `settings:{colors,material,motion}` でベース64URL符号化され、バージョン固定レンダラーに渡されます。レンダラーは数値・カラーを検証し、無効な設定を拒否します。編集プレビューとWordPress表示は同じ原理の描画ですが、サイズや配信先が異なるため最終の実画面確認が必要です。
+
+## 公開・運用上の注意
+
+- GitHub Pagesを開発用として継続。個人名を含む `.github.io` のURLが出力コードに入ります。将来Vercel等へ移す場合は出力ダイアログで配信先を変更し、レンダラーのファイル一式を同じ構成で配信してください。
+- `@paper-design/shaders@0.0.78` はMesh/Grainでのみ使用。**Silk Cascadeは自己完結WebGLで追加ライブラリを読み込まない。**
+- iframe配信先がCSP・セキュリティプラグイン・広告ブロック等によりブロックされないか確認。
+- 公開するフロントエンドJavaScriptは利用者から読めます。GitHubをPrivateにしても配信コードは隠せません。
 
 ## 配信URLと表示サイズ（010）
 
