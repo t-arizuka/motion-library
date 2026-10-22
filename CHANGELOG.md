@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Silk Material Study 001 — Independent visual quality gate (2026-10-22)
+- Radiant MIT sourceからSilk Cascade（優先）/Silk Groove（比較）の静止WebGL検証ページを追加。
+- `studies/silk-material-001/` 内だけで、PC/スマホの画面比率と文字色の切り替えを比較可能にした。
+- 原作の配色・材質の計算は保持、時間を固定し、ラベル・マウス操作・連続描画を停止。
+- MIT LICENSE同梱。デザイン仕様・正式採用後の編集GUI・WordPress用レンダラー案は専用READMEに記録。
+- **正式ギャラリーと既存embed/v1は変更していない。実GPU描画の品質承認は未取得。**
+
 ## 013 — Simplified WordPress export UI (2026-10-22)
 - WordPress用HTMLの書き出し画面を整理。MVセット/背景のみの出力形式、配信元URL、現在の出力サイズと背景名を分かりやすく表示。
 - コードコピーを主ボタンへ。長いHTMLコードは折りたたみ「生成コードを見る」の中へ移動。コード本体は変更なし。
