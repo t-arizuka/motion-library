@@ -74,7 +74,7 @@ function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layou
   const target=new URL('embed/v1/index.html',base);target.searchParams.set('data',cfg);
   const background=settings.colorBack||settings.colors[0];
   const frame=`<iframe title="Motion Library 背景" aria-hidden="true" tabindex="-1" loading="eager" src="${target.href.replaceAll('&','&amp;')}" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>`;
-  const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:${maxWidth}px;margin:0 auto;height:clamp(320px,70vh,${maxHeight}px);overflow:hidden;background:${background}">`;
+  const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:${maxWidth===null?'100%':maxWidth+'px'};margin:0 auto;height:clamp(320px,70vh,${maxHeight}px);overflow:hidden;background:${background}">`;
   if(mode==='background')return wrapperStart+frame+'</div>';
   if(mode!=='with-text')throw Error('出力形式が不正です');
   // Text/buttons are normal WordPress HTML outside the iframe (and stay clickable).
@@ -83,29 +83,79 @@ function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layou
   return wrapperStart+frame+overlay+'</div>';
 }
 function localPreviewUrl(template,settings,layout=LAYOUT_DEFAULT){
-  const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));const v=validateLayout(layout);u.searchParams.set('w',v.maxWidth);u.searchParams.set('h',v.maxHeight);return u.href;
+  const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));const v=validateLayout(layout);u.searchParams.set('w',v.maxWidth===null?'100%':String(v.maxWidth));u.searchParams.set('h',v.maxHeight);return u.href;
 }
 
 
 
 
 const $=id=>document.getElementById(id);
-const LAYOUT_KEY='motion-library-dimensions-v1';
-const LAYOUT_DEFAULT={maxWidth:1440,maxHeight:760};
+const LAYOUT_KEY='motion-library-dimensions-v2';
+const LEGACY_LAYOUT_KEY='motion-library-dimensions-v1';
+const LAYOUT_DEFAULT={maxWidth:null,maxHeight:760};
 const LAYOUT_RANGES={maxWidth:[320,2560],maxHeight:[360,1200]};
 const savedLayouts={};
-function validateLayout(layout){const v={};for(const key of Object.keys(LAYOUT_DEFAULT)){const n=layout?.[key],[min,max]=LAYOUT_RANGES[key];if(!Number.isInteger(n)||n<min||n>max)throw Error('表示サイズが範囲外です');v[key]=n;}return v;}
+function validateLayout(layout){
+  if(!layout||typeof layout!=='object')throw Error('表示サイズの設定が不正です');
+  const h=layout.maxHeight;
+  if(!Number.isInteger(h)||h<360||h>1200)throw Error('最大高さが範囲外です');
+  const w=layout.maxWidth;
+  if(w!==null&&(!Number.isInteger(w)||w<320||w>2560))throw Error('最大幅が範囲外です');
+  return {maxWidth:w,maxHeight:h};
+}
 function getLayout(){return savedLayouts[editorId]||LAYOUT_DEFAULT;}
 function persistLayout(){try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(savedLayouts));}catch(e){console.warn('表示サイズを保存できません',e);}}
-function syncLayout(){const v=getLayout(),b=$('preview-canvas')?.parentElement;$('max-width').value=v.maxWidth;$('max-height').value=v.maxHeight;if(b){b.style.maxWidth=v.maxWidth+'px';b.style.maxHeight=v.maxHeight+'px';b.style.marginInline='auto';}}
+function syncLayout(){
+  const v=getLayout(),b=$('preview-canvas')?.parentElement,fixed=v.maxWidth!==null;
+  $('width-mode').value=fixed?'fixed':'fluid';
+  $('fixed-width-control').hidden=!fixed;
+  if(fixed)$('max-width').value=v.maxWidth;
+  $('max-height').value=v.maxHeight;
+  if(b){b.style.maxWidth=fixed?v.maxWidth+'px':'100%';b.style.maxHeight=v.maxHeight+'px';b.style.marginInline='auto';}
+}
 function setupLayout(){
-  try{const obj=JSON.parse(localStorage.getItem(LAYOUT_KEY)||'{}');for(const id of Object.keys(TEMPLATES))if(obj?.[id])savedLayouts[id]=validateLayout(obj[id]);}catch(e){console.warn('表示サイズの読み込みに失敗しました',e);}
-  savedLayouts[editorId]??={...LAYOUT_DEFAULT};syncLayout();
-  for(const [key,id] of [['maxWidth','max-width'],['maxHeight','max-height']]){
-    const inp=$(id),[min,max]=LAYOUT_RANGES[key];
-    inp.addEventListener('input',()=>{const n=Number(inp.value);if(inp.value!==''&&Number.isInteger(n)&&n>=min&&n<=max){savedLayouts[editorId][key]=n;persistLayout();syncLayout();}});
-    inp.addEventListener('change',()=>{const n=Number(inp.value);if(inp.value!==''&&Number.isFinite(n)){savedLayouts[editorId][key]=Math.min(max,Math.max(min,Math.round(n)));persistLayout();}syncLayout();});
-  }
+  try{
+    const fresh=localStorage.getItem(LAYOUT_KEY);
+    const raw=JSON.parse(fresh||localStorage.getItem(LEGACY_LAYOUT_KEY)||'{}');
+    for(const id of Object.keys(TEMPLATES)){
+      if(!raw?.[id])continue;
+      const val={...raw[id]};
+      // Prior versions used 1440px as the default. Upgrade only that default to fluid.
+      if(!fresh&&val.maxWidth===1440)val.maxWidth=null;
+      savedLayouts[id]=validateLayout(val);
+    }
+  }catch(e){console.warn('表示サイズの読み込みに失敗しました',e);}
+  savedLayouts[editorId]??={...LAYOUT_DEFAULT};
+  syncLayout();
+  $('width-mode').addEventListener('change',()=>{
+    if($('width-mode').value==='fluid'){
+      if(savedLayouts[editorId].maxWidth!==null)$('max-width').value=savedLayouts[editorId].maxWidth;
+      savedLayouts[editorId].maxWidth=null;
+    }else{
+      let w=Number($('max-width').value);
+      if(!Number.isInteger(w)||w<320||w>2560)w=1440;
+      savedLayouts[editorId].maxWidth=w;
+    }
+    persistLayout();syncLayout();
+  });
+  const width=$('max-width');
+  width.addEventListener('input',()=>{const n=Number(width.value);if(width.value!==''&&Number.isInteger(n)&&n>=320&&n<=2560&&savedLayouts[editorId].maxWidth!==null){savedLayouts[editorId].maxWidth=n;persistLayout();syncLayout();}});
+  width.addEventListener('change',()=>{
+    if(savedLayouts[editorId].maxWidth===null)return;
+    const n=Number(width.value);
+    if(width.value!==''&&Number.isFinite(n)){savedLayouts[editorId].maxWidth=Math.min(2560,Math.max(320,Math.round(n)));persistLayout();}
+    syncLayout();
+  });
+  const height=$('max-height');
+  height.addEventListener('input',()=>{
+    const n=Number(height.value);
+    if(height.value!==''&&Number.isInteger(n)&&n>=360&&n<=1200){savedLayouts[editorId].maxHeight=n;persistLayout();syncLayout();}
+  });
+  height.addEventListener('change',()=>{
+    const n=Number(height.value);
+    if(height.value!==''&&Number.isFinite(n)){savedLayouts[editorId].maxHeight=Math.min(1200,Math.max(360,Math.round(n)));persistLayout();}
+    syncLayout();
+  });
 }
 
 const PAGE=document.body.dataset.page;
