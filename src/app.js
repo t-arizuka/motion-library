@@ -289,6 +289,9 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     const code=$('embed-code').value;
     if(!code)return;
     try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(code);toast('WordPress用HTMLをコピーしました');return;}}catch(e){}
+    // Clipboard fallback requires the source textarea to be visible.
+    const codeDetails=document.querySelector('.export-code-details');
+    if(codeDetails&&!codeDetails.open)codeDetails.open=true;
     $('embed-code').focus();$('embed-code').select();
     if(document.execCommand('copy'))toast('WordPress用HTMLをコピーしました');
     else toast('Ctrl+Cでコピーしてください');
