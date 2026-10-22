@@ -43,6 +43,9 @@
 .study-panel .panel-actions{margin-top:2px}
 .study-small-status{white-space:normal;max-width:230px;text-align:center;line-height:1.45}
 .study-hero .surface-status{z-index:6}
+.study-study-note{line-height:1.7;color:#83909d;font-size:10px}
+#silk-play[hidden],#motion-controls[hidden]{display:none!important}
+.study-frame{contain:strict}
 body.study-actual .editor-layout{display:block;min-height:0}
 body.study-actual .editor-panel{display:none}
 body.study-actual .preview-area{width:100%;max-width:none;padding:16px 0 28px}
@@ -120,6 +123,7 @@ body.study-actual .footer{margin-top:auto}
         </div>
         <div class="preview-tool-right">
           <label class="inline-check"><input id="show-text" type="checkbox" checked> 文字を表示</label>
+          <button type="button" id="silk-play" class="tool-link" aria-label="シルクの動きを一時停止する" aria-pressed="true">一時停止</button>
         </div>
         <span class="render-state study-small-status" id="gpu-status" aria-live="polite">描画を確認中</span>
       </div>
@@ -161,10 +165,15 @@ body.study-actual .footer{margin-top:auto}
       <div class="section-heading"><span class="section-number">03</span><h3>素材感</h3></div>
       <div id="study-material"></div>
       <p class="study-material-note">静止画でも変化を確認できる項目です。</p>
-      <p class="study-locked-note">動きの速度は、静止ビジュアルの品質承認後に追加します。</p>
+      <p class="study-locked-note" id="motion-phase-note">Silk Cascadeはアニメーション試作中です。Silk Grooveは静止画比較のままです。</p>
+    </section>
+    <section class="setting-section" id="motion-controls">
+      <div class="section-heading"><span class="section-number">04</span><h3>動き</h3></div>
+      <div id="study-motion"></div>
+      <p class="study-material-note">速度は流れる速さ、揺れ幅はゆったりした移動、なめらかさは細かな折り目の出方を調整します。</p>
     </section>
     <section class="setting-section">
-      <div class="section-heading"><span class="section-number">04</span><h3>文字の見え方</h3></div>
+      <div class="section-heading"><span class="section-number">05</span><h3>文字の見え方</h3></div>
       <div class="study-text-colors" role="group" aria-label="文字色を選択">
         <button type="button" data-copy="white" aria-pressed="true">白文字</button>
         <button type="button" data-copy="dark" aria-pressed="false">黒文字</button>
@@ -181,17 +190,17 @@ body.study-actual .footer{margin-top:auto}
     </details>
     <details class="advanced">
       <summary>検証について <span>必要な場合だけ</span></summary>
-      <p class="study-footnote">RadiantのMITライセンス作品を静止化し、作品に適した色・素材の調整機能を追加しました。アニメーションとWordPress用HTML書き出しは、品質承認後の実装予定です。</p>
+      <p class="study-footnote">Silk Cascadeはアニメーション試作版です。Silk Grooveは静止画比較のままです。色と素材感を調整できます。WordPress用HTMLの書き出しは、動きの品質承認後に実装します。</p>
       <p class="study-footnote"><a href="https://radiant-shaders.com/shader/silk-cascade" target="_blank" rel="noopener noreferrer">Silk Cascade 公式 ↗</a> ／ <a href="https://radiant-shaders.com/shader/silk-groove" target="_blank" rel="noopener noreferrer">Silk Groove 公式 ↗</a></p>
     </details>
     <div class="panel-actions">
       <button type="button" id="open-large-preview" class="button-primary">大きく確認する <span aria-hidden="true">↗</span></button>
-      <p>調整は静止画の比較専用です。WordPress用コード生成・正式ギャラリーへの掲載は品質承認後です。</p>
-      <p class="study-state" id="study-state" aria-live="polite">静止ビジュアルの品質承認待ちです。</p>
+      <p>Silk Cascadeの動きと質感を確認する試作版です。WordPress用コード生成・正式ギャラリーへの掲載は、動きの品質承認後に行います。</p>
+      <p class="study-state" id="study-state" aria-live="polite">Silk Cascadeのアニメーション品質は未承認です。</p>
     </div>
   </aside>
 </main>
-<footer class="footer"><span>Motion Library — Silk Material Study 001 / Quality Gate</span><span>Radiant / MIT · © 2025 Paul Bakaus</span></footer>
+<footer class="footer"><span>Motion Library — Silk Cascade Animation Prototype 001 / Quality Gate</span><span>Radiant / MIT · © 2025 Paul Bakaus</span></footer>
 </div>
 <script>
 (() => {
@@ -209,6 +218,11 @@ body.study-actual .footer{margin-top:auto}
       sliders:[
         {key:'sheen',label:'光沢の強さ',min:.3,max:2,step:.05,value:1},
         {key:'layerOpacity',label:'布の重なり',min:.55,max:1.35,step:.05,value:1}
+      ],
+      motion:[
+        {key:'speed',label:'速度',min:0.1,max:1.5,step:0.05,value:0.4},
+        {key:'sway',label:'揺れ幅',min:0,max:1,step:0.05,value:0.35},
+        {key:'smoothness',label:'流れのなめらかさ',min:0,max:1,step:0.05,value:0}
       ]
     },
     groove:{
@@ -227,7 +241,8 @@ body.study-actual .footer{margin-top:auto}
   const hexOK = /^#[0-9a-fA-F]{6}$/;
   const defaults=key=>({
     colors:Object.fromEntries(variants[key].colors.map(x=>[x.key,x.value])),
-    material:Object.fromEntries(variants[key].sliders.map(x=>[x.key,x.value]))
+    material:Object.fromEntries(variants[key].sliders.map(x=>[x.key,x.value])),
+    motion:Object.fromEntries((variants[key].motion||[]).map(x=>[x.key,x.value]))
   });
   const values={cascade:defaults('cascade'),groove:defaults('groove')};
   const $=id=>document.getElementById(id);
@@ -235,7 +250,8 @@ body.study-actual .footer{margin-top:auto}
     shader:params.get('shader')==='groove'?'groove':'cascade',
     device:params.get('device')==='mobile'?'mobile':'desktop',
     text:params.get('text')!=='0',
-    color:params.get('color')==='dark'?'dark':'white'
+    color:params.get('color')==='dark'?'dark':'white',
+    playing:params.get('play')==='1'||(params.get('play')!=='0'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   };
   const actual=params.get('view')==='actual';
   const hero=$('study-hero'),frame=$('study-frame'),gpu=$('gpu-status'),loading=$('shader-loading');
@@ -258,6 +274,12 @@ body.study-actual .footer{margin-top:auto}
             values[key].material[entry.key]=Math.round(v/entry.step)*entry.step;
           }
         }
+        for(const entry of variants[key].motion||[]){
+          const v=p.motion?.[entry.key];
+          if(typeof v==='number'&&Number.isFinite(v)&&v>=entry.min&&v<=entry.max){
+            values[key].motion[entry.key]=Math.round(v/entry.step)*entry.step;
+          }
+        }
       }
     }
   }catch(e){/* Invalid review URL settings fall back to originals. */}
@@ -266,7 +288,8 @@ body.study-actual .footer{margin-top:auto}
     if(!frame.contentWindow)return;
     const settings=values[state.shader];
     frame.contentWindow.postMessage({
-      type:'motion-silk-study-settings',colors:settings.colors,...settings.material
+      type:'motion-silk-study-settings',colors:settings.colors,...settings.material,
+      ...(state.shader==='cascade'?{...settings.motion,playing:state.playing}:{})
     },location.origin);
   }
   function watchFrame(){
@@ -277,7 +300,7 @@ body.study-actual .footer{margin-top:auto}
       if(seq!==requestSeq)return;
       if(getReady()){
         loading.hidden=true;gpu.textContent='WebGL 描画完了';gpu.classList.add('ready');
-        $('study-state').textContent='調整は静止WebGLに反映されます。品質の合格判定はまだです。';
+        $('study-state').textContent=state.shader==='cascade'?'Silk Cascadeは動きの品質検証中です。':'Silk Grooveは静止ビジュアルの比較用です。';
         return;
       }
       if(++pollCount<28){pollTimer=setTimeout(poll,150);return}
@@ -300,6 +323,17 @@ body.study-actual .footer{margin-top:auto}
       '<output id="study-out-'+s.key+'">'+Number(item.material[s.key]).toFixed(2)+'</output></div>'+
       '<input type="range" id="study-range-'+s.key+'" data-silk-range="'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+item.material[s.key]+'"></div>'
     ).join('');
+    $('study-motion').innerHTML=(def.motion||[]).map(s=>
+      '<div class="control-range"><div class="range-top"><label for="study-motion-'+s.key+'">'+s.label+'</label>'+
+      '<output id="study-motion-out-'+s.key+'">'+Number(item.motion[s.key]).toFixed(2)+'</output></div>'+
+      '<input type="range" id="study-motion-'+s.key+'" data-silk-motion="'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+item.motion[s.key]+'"></div>'
+    ).join('');
+    $('study-motion').querySelectorAll('[data-silk-motion]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkMotion;
+      item.motion[key]=Number(input.value);
+      $('study-motion-out-'+key).textContent=Number(input.value).toFixed(2);
+      sendSettings();
+    }));
     $('study-colors').querySelectorAll('[data-silk-color]').forEach(input=>input.addEventListener('input',()=>{
       const key=input.dataset.silkColor;
       item.colors[key]=input.value.toUpperCase();
@@ -345,6 +379,12 @@ body.study-actual .footer{margin-top:auto}
     hero.classList.toggle('hide-copy',!state.text);
     hero.classList.toggle('copy-dark',state.color==='dark');
     $('show-text').checked=state.text;
+    $('motion-controls').hidden=state.shader!=='cascade';
+    const play=$('silk-play');
+    play.hidden=state.shader!=='cascade';
+    play.textContent=state.playing?'一時停止':'再生';
+    play.setAttribute('aria-pressed',String(state.playing));
+    play.setAttribute('aria-label',state.playing?'シルクの動きを一時停止する':'シルクの動きを再生する');
     document.querySelectorAll('[data-device]').forEach(btn=>{
       const on=btn.dataset.device===state.device;
       btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',String(on));
@@ -363,6 +403,11 @@ body.study-actual .footer{margin-top:auto}
     if(el.checked){state.shader=el.value;render()}
   }));
   $('show-text').addEventListener('change',e=>{state.text=e.target.checked;render()});
+  $('silk-play').addEventListener('click',()=>{
+    if(state.shader!=='cascade')return;
+    state.playing=!state.playing;
+    render();
+  });
   $('reset-study').addEventListener('click',()=>{
     values[state.shader]=defaults(state.shader);render();
   });
@@ -373,6 +418,7 @@ body.study-actual .footer{margin-top:auto}
     u.searchParams.set('device',state.device);
     u.searchParams.set('text',state.text?'1':'0');
     u.searchParams.set('color',state.color);
+    u.searchParams.set('play',state.playing?'1':'0');
     u.searchParams.set('settings',JSON.stringify(values));
     return u.href;
   }
