@@ -53,6 +53,10 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     'uniform vec2 u_res;',
     'uniform float u_flowSpeed;',
     'uniform float u_foldDepth;',
+    'uniform float u_gloss;',
+    'uniform vec3 u_col1;',
+    'uniform vec3 u_col2;',
+    'uniform vec3 u_col3;',
     'uniform vec2 u_mouse;',
     '',
     '// --- Simplex noise ---',
@@ -159,6 +163,7 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  // Height and normal of the silk surface',
     '  float h = silkHeight(sp, t) * u_foldDepth;',
     '  vec3 N = silkNormal(sp, t);',
+    '  N=normalize(vec3(N.xy*u_foldDepth,N.z));',
     '',
     '  // ── Lighting — warm two-point setup ──',
     '  // Mouse controls light direction for shimmering silk highlights',
@@ -196,12 +201,12 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.0);',
     '',
     '  // ── Color palette — luxurious warm silk ──',
-    '  vec3 deepAmber    = vec3(0.45, 0.22, 0.08);',
-    '  vec3 richGold     = vec3(0.70, 0.50, 0.16);',
-    '  vec3 warmBurgundy = vec3(0.32, 0.07, 0.09);',
-    '  vec3 deepRose     = vec3(0.48, 0.16, 0.14);',
-    '  vec3 lightSilk    = vec3(1.0, 0.88, 0.55);',
-    '  vec3 pearlHL      = vec3(1.0, 0.94, 0.75);',
+    '  vec3 deepAmber    = vec3(0.45, 0.22, 0.08)*u_col2/vec3(0.70,0.50,0.16);',
+    '  vec3 richGold     = u_col2;',
+    '  vec3 warmBurgundy = u_col1;',
+    '  vec3 deepRose     = vec3(0.48,0.16,0.14)*u_col1/vec3(0.32,0.07,0.09);',
+    '  vec3 lightSilk    = u_col3;',
+    '  vec3 pearlHL      = vec3(1.0,0.94,0.75)*u_col3/vec3(1.0,0.88,0.55);',
     '',
     '  // Smoothly varying base color across fabric',
     '  float cm1 = smoothstep(-0.3, 0.4, h);',
@@ -218,15 +223,15 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  // Primary warm key light',
     '  vec3 lc1 = vec3(1.0, 0.87, 0.58);',
     '  col += baseColor * wd1 * 0.5 * lc1;',
-    '  col += baseColor * sheen1 * lc1;',
-    '  col += lightSilk * spec1 * 0.6;',
-    '  col += pearlHL * spark * 0.5;',
+    '  col += baseColor * sheen1 * lc1*u_gloss;',
+    '  col += lightSilk * spec1 * 0.6*u_gloss;',
+    '  col += pearlHL * spark * 0.5*u_gloss;',
     '',
     '  // Secondary cooler fill',
     '  vec3 lc2 = vec3(0.6, 0.5, 0.72);',
     '  col += baseColor * d2 * 0.18 * lc2;',
-    '  col += baseColor * sheen2 * lc2;',
-    '  col += vec3(0.75, 0.65, 0.85) * spec2 * 0.2;',
+    '  col += baseColor * sheen2 * lc2*u_gloss;',
+    '  col += vec3(0.75, 0.65, 0.85) * spec2 * 0.2*u_gloss;',
     '',
     '  // Fresnel edge glow',
     '  col += pearlHL * fresnel * 0.1;',
@@ -237,7 +242,7 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  float foldDir = ca2 * sp.x + sa2 * sp.y;',
     '  float shim = sin(foldDir * 4.0 - t * 1.5) * 0.5 + 0.5;',
     '  shim = pow(shim, 18.0);',
-    '  col += pearlHL * shim * (spec1 + sheen1 * 0.3) * 0.5;',
+    '  col += pearlHL * shim * (spec1 + sheen1 * 0.3) * 0.5*u_gloss;',
     '',
     '  // ── Fold shadows — darken valleys ──',
     '  float valley = smoothstep(0.05, -0.25, h);',
@@ -296,6 +301,12 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
   var uFlowSpeed = gl.getUniformLocation(prog, 'u_flowSpeed');
   var uFoldDepth = gl.getUniformLocation(prog, 'u_foldDepth');
   var uMouse = gl.getUniformLocation(prog, 'u_mouse');
+  var uGloss=gl.getUniformLocation(prog,'u_gloss');
+  var uColor1=gl.getUniformLocation(prog,'u_col1');
+  var uColor2=gl.getUniformLocation(prog,'u_col2');
+  var uColor3=gl.getUniformLocation(prog,'u_col3');
+  var glossVal=1.0;
+  var colors={col1:[0.32,0.07,0.09],col2:[0.70,0.50,0.16],col3:[1.0,0.88,0.55]};
   var flowSpeedVal = 0.8;
   var foldDepthVal = 1.0;
 
@@ -343,6 +354,10 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     gl.uniform1f(uTime, prefersReduced ? 0.0 : now * 0.001);
     gl.uniform1f(uFlowSpeed, flowSpeedVal);
     gl.uniform1f(uFoldDepth, foldDepthVal);
+    gl.uniform1f(uGloss,glossVal);
+    gl.uniform3fv(uColor1,colors.col1);
+    gl.uniform3fv(uColor2,colors.col2);
+    gl.uniform3fv(uColor3,colors.col3);
     gl.uniform2f(uMouse, mouseXVal, mouseYVal);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     document.documentElement.dataset.studyReady = "true";
@@ -358,13 +373,23 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
 
   requestAnimationFrame(render);
 
+  function colorFromHex(hex) {
+    if(typeof hex!=='string'||!/^#[0-9a-fA-F]{6}$/.test(hex))return null;
+    return [1,3,5].map(function(i){return parseInt(hex.slice(i,i+2),16)/255});
+  }
+  function bounded(n,lo,hi) { return typeof n==='number'&&Number.isFinite(n)?Math.max(lo,Math.min(hi,n)):null; }
+  // Only the same-origin parent review UI can modify this frozen shader.
   window.addEventListener('message', function(e) {
-    if (e.data && e.data.type === 'param') {
-      switch (e.data.name) {
-        case 'FLOW_SPEED': flowSpeedVal = e.data.value; break;
-        case 'FOLD_DEPTH': foldDepthVal = e.data.value; break;
-      }
+    if(e.source!==window.parent||e.origin!==location.origin||!e.data||e.data.type!=='motion-silk-study-settings')return;
+    var d=e.data;
+    if(d.colors&&typeof d.colors==='object') {
+      ['col1','col2','col3'].forEach(function(key){
+        var v=colorFromHex(d.colors[key]); if(v)colors[key]=v;
+      });
     }
+    var fold=bounded(d.foldDepth,0.5,1.6);if(fold!==null)foldDepthVal=fold;
+    var shiny=bounded(d.gloss,0.3,1.8);if(shiny!==null)glossVal=shiny;
+    if(running&&document.visibilityState!=='hidden')requestAnimationFrame(render);
   });
 })();
 </script>
