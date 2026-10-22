@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 014 — Silk Cascade approved / added to collection and WordPress export (2026-10-22)
+- Silk Cascadeの色変更・静止品質・アニメーション品質がユーザー確認で合格。正式ライブラリ3作品目として`index.html`へ追加。
+- `silk.html` 正式エディタを新規作成。共通CSS、色・素材・速度、実寸、幅100%／高さ760pxを標準とするサイズ編集、JSON保存・読込、WordPress用HTMLのMVセット／背景のみを実装。
+- `embed/silk/v1/index.html` と`shader.html` を版固定して追加。schemaVersion 1の色・素材・動きデータを検証し、既存`embed/v1`に干渉しない。
+- Silk Grooveは未承認の比較研究に残し、ギャラリーへ追加しない。
+- LICENSE、README、WordPress検証項目を更新。GitHub Pages継続、Vercelは会社申請待ち。
+- 追加実装のブラウザ・GPU実表示とWordPress保存テストは未実施のため、納品前検証が必要。
+
 ## Silk Cascade Animation Prototype 001 — Motion study (2026-10-22)
 - Silk CascadeのWebGL描画に30fps上限のアニメーション再生と再生／一時停止を実装。
 - GUIに速度、揺れ幅、流れのなめらかさを追加。色・素材・作品比較・実寸プレビューを維持。
