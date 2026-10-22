@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Motion Library — 実寸プレビュー</title>
+<style>
+:root{color-scheme:light;font-family:Inter,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#f6f7f8;color:#1b2937}
+.toolbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;min-height:64px;padding:12px clamp(16px,3vw,32px);background:rgba(255,255,255,.97);border-bottom:1px solid #e5e9ed;flex-wrap:wrap}
+.brand{font-size:15px;font-weight:760;letter-spacing:-.04em;white-space:nowrap}
+.brand small{margin-left:9px;color:#9aa5b0;letter-spacing:.07em;font-size:10px}
+.summary{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:#657483}
+.controls{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-left:auto}
+.controls label{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#516173;white-space:nowrap;cursor:pointer}
+.controls input{accent-color:#34485c}
+.back{font-size:11px;text-decoration:none;color:#33485d;border:1px solid #dce2e9;border-radius:100px;padding:9px 14px;white-space:nowrap;background:#fff}
+.area{width:100%;min-height:0}
+.hero{position:relative;isolation:isolate;width:100%;max-width:100%;height:clamp(320px,70vh,760px);overflow:hidden;margin-inline:auto;background:#b9bbca}
+.hero iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;display:block;z-index:1}
+.shade{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(20,22,32,.19),transparent 72%)}
+.copy{position:relative;z-index:3;width:100%;height:100%;min-height:0;display:flex;align-items:flex-start;justify-content:center;flex-direction:column;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755;pointer-events:none}
+.copy h1{font-size:clamp(28px,4.2vw,64px);line-height:1.35;letter-spacing:-.04em;margin:12px 0 18px;font-weight:630}
+.copy .eyebrow{font-size:10px;font-weight:750;letter-spacing:.16em}
+.copy p{font-size:clamp(13px,1.2vw,18px);margin:0 0 29px}
+.copy a{display:inline-block;padding:14px 24px;background:#fff;color:#28384b;border-radius:4px;font-size:13px;text-decoration:none;text-shadow:none;pointer-events:auto;font-weight:650}
+.copy[hidden],.shade[hidden]{display:none!important}
+.caption{padding:18px clamp(16px,3vw,32px) 40px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:11px;line-height:1.7;color:#83909f}
+.notice{color:#925a44;font-size:12px;line-height:1.7;padding:22px;max-width:700px;margin:20px auto;border:1px solid #ead2c9;background:#fff}
+@media(max-width:640px){.toolbar{gap:10px;min-height:64px}.summary{order:3;width:100%}.controls{gap:10px}.copy h1{font-size:28px}.copy .eyebrow{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.hero{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="toolbar">
+  <div class="brand">motionlibrary <small>ACTUAL SIZE</small></div>
+  <output id="size" class="summary" aria-live="polite">サイズを測定中…</output>
+  <div class="controls">
+    <label><input id="show-copy" type="checkbox" checked> 文字を表示</label>
+    <label title="WordPress出力では画面高70%を基準とします"><input id="show-maximum" type="checkbox"> 設定した最大高さで確認</label>
+    <a class="back" id="close" href="index.html">編集画面へ戻る ↗</a>
+  </div>
+</header>
+<main>
+<div class="area">
+  <section class="hero" id="hero" aria-label="埋め込み背景の実寸プレビュー">
+    <iframe id="background" title="Motion Library 動く背景" aria-hidden="true" tabindex="-1" loading="eager" scrolling="no"></iframe>
+    <div class="shade" id="shade"></div>
+    <div class="copy" id="copy">
+      <span class="eyebrow">BRAND MESSAGE / 2026</span>
+      <h1>新しい未来を、<br>ここから。</h1>
+      <p>可能性は、いつも創造の先にある。</p>
+      <a href="#preview-note">詳しく見る →</a>
+    </div>
+  </section>
+</div>
+<div class="caption" id="preview-note">
+  <span id="mode-note">通常モード：WordPress用コードと同じ「画面高70%・最大高さ制限」で表示します。</span>
+  <span>表示値はブラウザのCSS pxです。実際のサイトではテーマのコンテンツ幅に影響されます。</span>
+</div>
+</main>
+<script>
+(()=>{
+'use strict';
+const params=new URLSearchParams(location.search);
+const hero=document.getElementById('hero');
+const size=document.getElementById('size');
+const status=document.getElementById('mode-note');
+const showMax=document.getElementById('show-maximum');
+const showCopy=document.getElementById('show-copy');
+const copy=document.getElementById('copy');
+const shade=document.getElementById('shade');
+const w=params.get('w')??'100%';
+const h=Number(params.get('h')??'760');
+if(!(w==='100%'||(/^[0-9]{3,4}$/.test(w)&&Number(w)>=320&&Number(w)<=2560))||
+   !Number.isInteger(h)||h<360||h>1200){
+  document.querySelector('.area').innerHTML='<div class="notice">表示サイズが不正です。編集ページから再度「実寸プレビュー」を開いてください。</div>';
+  size.textContent='設定エラー';
+  return;
+}
+hero.style.maxWidth=w==='100%'?'100%':w+'px';
+const renderer=new URL('embed/v1/index.html',location.href);
+const data=params.get('data');
+if(!data||data.length>8192||!/^[A-Za-z0-9_-]+$/.test(data)){
+  document.querySelector('.area').innerHTML='<div class="notice">アニメーション設定がありません。編集ページから開いてください。</div>';
+  size.textContent='設定エラー';
+  return;
+}
+renderer.searchParams.set('data',data);
+document.getElementById('background').src=renderer.href;
+const rawBackground='#444653';
+try{
+  const decoded=atob(data.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-data.length%4)%4));
+  const config=JSON.parse(decoded).settings;
+  const colors=Array.isArray(config?.colors)?config.colors:[];
+  if(colors.length===4&&colors.every(c=>/^#[0-9a-fA-F]{6}$/.test(c))){
+    hero.style.background='linear-gradient(115deg,'+colors.join(',')+')';
+  }else hero.style.background=rawBackground;
+}catch(e){hero.style.background=rawBackground;}
+showCopy.checked=params.get('text')!=='0';
+function render(){
+  hero.style.height=showMax.checked?h+'px':'clamp(320px,70vh,'+h+'px)';
+  copy.hidden=!showCopy.checked;
+  shade.hidden=!showCopy.checked;
+  const r=hero.getBoundingClientRect();
+  size.textContent=Math.round(r.width)+' × '+Math.round(r.height)+' CSS px  /  '+(showMax.checked?'上限を確認':'埋め込み相当');
+  status.textContent=showMax.checked
+    ?'最大高さ確認モード：指定上限の'+h+'pxで表示中。実際のWordPress表示は画面高70%が基準です。'
+    :'通常モード：WordPress用コードと同じ「画面高70%・最大'+h+'px」で表示しています。';
+}
+document.getElementById('close').addEventListener('click',e=>{if(history.length>1){e.preventDefault();window.close();}});
+showMax.addEventListener('change',render);
+showCopy.addEventListener('change',render);
+window.addEventListener('resize',render);
+if('ResizeObserver'in window)new ResizeObserver(render).observe(hero);
+render();
+})();
+</script>
+</body></html>
