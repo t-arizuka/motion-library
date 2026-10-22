@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Silk Study 001.1 — Approved editor UI alignment (2026-10-22)
+- Silk静止検証ページのUIを、承認済みMesh/Grain編集画面の共通CSS・ヘッダー・左右2カラム・操作系に統一。
+- 作品の切り替え、PC/スマホ、文字表示/白黒、初期化、大きいプレビューを実装し操作ロジックを確認。
+- 原作WebGLシェーダー、正式ギャラリー、WordPress用生成機能は変更なし。
+- 実WebGL描画の品質検証とユーザー承認は引き続き保留。
+
 ## Silk Material Study 001 — Independent visual quality gate (2026-10-22)
 - Radiant MIT sourceからSilk Cascade（優先）/Silk Groove（比較）の静止WebGL検証ページを追加。
 - `studies/silk-material-001/` 内だけで、PC/スマホの画面比率と文字色の切り替えを比較可能にした。
