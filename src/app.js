@@ -67,28 +67,47 @@ function normalizePublishUrl(input){
   url.pathname=url.pathname.replace(/\/$/,'')+'/';
   return url;
 }
-function generateIframeEmbed(template,settings,publishUrl,mode='with-text'){
+function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layout=LAYOUT_DEFAULT){
   const cfg=encodeConfig(template,settings);
+  const {maxWidth,maxHeight}=validateLayout(layout);
   const base=normalizePublishUrl(publishUrl);
   const target=new URL('embed/v1/index.html',base);target.searchParams.set('data',cfg);
   const background=settings.colorBack||settings.colors[0];
   const frame=`<iframe title="Motion Library 背景" aria-hidden="true" tabindex="-1" loading="eager" src="${target.href.replaceAll('&','&amp;')}" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>`;
-  const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;min-height:clamp(360px,70vh,760px);overflow:hidden;background:${background}">`;
+  const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:${maxWidth}px;margin:0 auto;height:clamp(320px,70vh,${maxHeight}px);overflow:hidden;background:${background}">`;
   if(mode==='background')return wrapperStart+frame+'</div>';
   if(mode!=='with-text')throw Error('出力形式が不正です');
   // Text/buttons are normal WordPress HTML outside the iframe (and stay clickable).
-  const overlay=`<div class="motion-library-mv-content" style="position:relative;z-index:1;min-height:clamp(360px,70vh,760px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>`;
+  const overlay=`<div class="motion-library-mv-content" style="position:relative;z-index:1;height:100%;min-height:0;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>`;
   // A single line helps Classic Editor avoid wpautop injecting unwanted tags.
   return wrapperStart+frame+overlay+'</div>';
 }
-function localPreviewUrl(template,settings){
-  const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));return u.href;
+function localPreviewUrl(template,settings,layout=LAYOUT_DEFAULT){
+  const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));const v=validateLayout(layout);u.searchParams.set('w',v.maxWidth);u.searchParams.set('h',v.maxHeight);return u.href;
 }
 
 
 
 
 const $=id=>document.getElementById(id);
+const LAYOUT_KEY='motion-library-dimensions-v1';
+const LAYOUT_DEFAULT={maxWidth:1440,maxHeight:760};
+const LAYOUT_RANGES={maxWidth:[320,2560],maxHeight:[360,1200]};
+const savedLayouts={};
+function validateLayout(layout){const v={};for(const key of Object.keys(LAYOUT_DEFAULT)){const n=layout?.[key],[min,max]=LAYOUT_RANGES[key];if(!Number.isInteger(n)||n<min||n>max)throw Error('表示サイズが範囲外です');v[key]=n;}return v;}
+function getLayout(){return savedLayouts[editorId]||LAYOUT_DEFAULT;}
+function persistLayout(){try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(savedLayouts));}catch(e){console.warn('表示サイズを保存できません',e);}}
+function syncLayout(){const v=getLayout(),b=$('preview-canvas')?.parentElement;$('max-width').value=v.maxWidth;$('max-height').value=v.maxHeight;if(b){b.style.maxWidth=v.maxWidth+'px';b.style.maxHeight=v.maxHeight+'px';b.style.marginInline='auto';}}
+function setupLayout(){
+  try{const obj=JSON.parse(localStorage.getItem(LAYOUT_KEY)||'{}');for(const id of Object.keys(TEMPLATES))if(obj?.[id])savedLayouts[id]=validateLayout(obj[id]);}catch(e){console.warn('表示サイズの読み込みに失敗しました',e);}
+  savedLayouts[editorId]??={...LAYOUT_DEFAULT};syncLayout();
+  for(const [key,id] of [['maxWidth','max-width'],['maxHeight','max-height']]){
+    const inp=$(id),[min,max]=LAYOUT_RANGES[key];
+    inp.addEventListener('input',()=>{const n=Number(inp.value);if(inp.value!==''&&Number.isInteger(n)&&n>=min&&n<=max){savedLayouts[editorId][key]=n;persistLayout();syncLayout();}});
+    inp.addEventListener('change',()=>{const n=Number(inp.value);if(inp.value!==''&&Number.isFinite(n)){savedLayouts[editorId][key]=Math.min(max,Math.max(min,Math.round(n)));persistLayout();}syncLayout();});
+  }
+}
+
 const PAGE=document.body.dataset.page;
 const KEY='motion-library-gallery-editor-003';
 const limits={speed:[0,1.8],strength:[0,1],swirl:[0,1],grainMixer:[0,.5],grainOverlay:[0,.35],softness:[.2,1],noise:[0,.6]};
@@ -158,15 +177,15 @@ function buildPresets(){
   updatePresetSelection();
 }
 function buildAdvanced(){const root=$('advanced-settings');root.replaceChildren();for(const def of TEMPLATES[editorId].advanced){const line=document.createElement('div');line.className='advanced-line';const label=document.createElement('label');const id='field-'+def.key;label.htmlFor=id;label.textContent=def.label;line.append(label);if(def.choices){const select=document.createElement('select');select.id=id;for(const [val,caption] of def.choices){const option=new Option(caption,val);select.add(option);}select.value=getEditorState()[def.key];select.addEventListener('change',()=>mutate(s=>s[def.key]=select.value));line.append(select);}else{const out=document.createElement('output');out.textContent=getEditorState()[def.key].toFixed(2);const range=document.createElement('input');range.type='range';range.id=id;range.min=def.min;range.max=def.max;range.step=def.step;range.value=getEditorState()[def.key];range.addEventListener('input',()=>{out.textContent=Number(range.value).toFixed(2);mutate(s=>s[def.key]=Number(range.value));});line.append(out,range);}root.append(line);}}
-function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();buildPresets();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
+function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??=makeDefaultSettings(editorId);setupLayout();$('editor-title').textContent=TEMPLATES[editorId].title;$('template-kicker').textContent=`BACKGROUND / ${TEMPLATES[editorId].number}`;const s=getEditorState();drawColors();buildAdvanced();buildPresets();$('speed').value=s.speed;$('speed-val').textContent=s.speed.toFixed(2);$('strength').value=s.strength;$('strength-val').textContent=s.strength.toFixed(2);
   $('speed').addEventListener('input',()=>{$('speed-val').textContent=Number($('speed').value).toFixed(2);mutate(s=>s.speed=Number($('speed').value));});$('strength').addEventListener('input',()=>{$('strength-val').textContent=Number($('strength').value).toFixed(2);mutate(s=>s.strength=Number($('strength').value));});
   function setDevice(next){device=next;$('preview-canvas').classList.toggle('mobile',device==='mobile');for(const button of document.querySelectorAll('[data-device]')){button.classList.toggle('active',button.dataset.device===device);button.setAttribute('aria-pressed',String(button.dataset.device===device));}}
   document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>setDevice(btn.dataset.device)));
   $('show-text').addEventListener('change',()=>{$('preview-canvas').classList.toggle('hide-copy',!$('show-text').checked);showCopy=$('show-text').checked;});
   $('play').addEventListener('click',()=>{isPlaying=!isPlaying;$('play').textContent=isPlaying?'一時停止':'再生';currentMount?.setSpeed(isPlaying?getEditorState().speed:0);});$('play').textContent=isPlaying?'一時停止':'再生';
-  $('reset').addEventListener('click',()=>{if(!confirm('このアニメーションの色と設定を初期値に戻しますか？'))return;saved[editorId]=makeDefaultSettings(editorId);persist();const val=getEditorState();drawColors();buildAdvanced();$('speed').value=val.speed;$('strength').value=val.strength;$('speed-val').textContent=val.speed.toFixed(2);$('strength-val').textContent=val.strength.toFixed(2);refreshShader();toast('初期設定に戻しました');});
-  $('save').addEventListener('click',()=>{const file={schemaVersion:3,template:editorId,settings:deepCopy(getEditorState())};const blob=new Blob([JSON.stringify(file,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`motion-${editorId}-settings.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('設定を保存しました');});
-  $('load').addEventListener('click',()=>$('load-file').click());$('load-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>64000)throw Error('ファイルが大きすぎます');const data=JSON.parse(await file.text());if(data.schemaVersion!==3||data.template!==editorId)throw Error('このアニメーション用の設定ファイルではありません');saved[editorId]=validate(editorId,data.settings);persist();drawColors();buildAdvanced();const s=getEditorState();$('speed').value=s.speed;$('strength').value=s.strength;$('speed-val').textContent=s.speed.toFixed(2);$('strength-val').textContent=s.strength.toFixed(2);refreshShader();toast('設定を読み込みました');}catch(err){toast(`読み込みエラー: ${err.message||err}`);}finally{e.target.value='';}});
+  $('reset').addEventListener('click',()=>{if(!confirm('このアニメーションの色と設定を初期値に戻しますか？'))return;saved[editorId]=makeDefaultSettings(editorId);persist();savedLayouts[editorId]={...LAYOUT_DEFAULT};persistLayout();syncLayout();const val=getEditorState();drawColors();buildAdvanced();$('speed').value=val.speed;$('strength').value=val.strength;$('speed-val').textContent=val.speed.toFixed(2);$('strength-val').textContent=val.strength.toFixed(2);refreshShader();toast('初期設定に戻しました');});
+  $('save').addEventListener('click',()=>{const file={schemaVersion:3,template:editorId,settings:deepCopy(getEditorState()),layout:deepCopy(getLayout())};const blob=new Blob([JSON.stringify(file,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`motion-${editorId}-settings.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('設定を保存しました');});
+  $('load').addEventListener('click',()=>$('load-file').click());$('load-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>64000)throw Error('ファイルが大きすぎます');const data=JSON.parse(await file.text());if(data.schemaVersion!==3||data.template!==editorId)throw Error('このアニメーション用の設定ファイルではありません');saved[editorId]=validate(editorId,data.settings);persist();if(data.layout){savedLayouts[editorId]=validateLayout(data.layout);persistLayout();syncLayout();}drawColors();buildAdvanced();const s=getEditorState();$('speed').value=s.speed;$('strength').value=s.strength;$('speed-val').textContent=s.speed.toFixed(2);$('strength-val').textContent=s.strength.toFixed(2);refreshShader();toast('設定を読み込みました');}catch(err){toast(`読み込みエラー: ${err.message||err}`);}finally{e.target.value='';}});
   // No-plugin background iframe export. All copy and buttons remain in WordPress DOM.
   const embedDialog=$('embed-dialog');
   const publishUrl=$('publish-url');
@@ -174,17 +193,21 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     const stored=localStorage.getItem('ml-publish-base')||'';
     publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
   }catch(e){}
-  const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()));
+  const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()));
   function refreshExport(){
     const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
     try{
-      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode);
+      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode,deepCopy(getLayout()));
+      const host=normalizePublishUrl(publishUrl.value).hostname.toLowerCase(),personal=host.endsWith('.github.io');
+      $('source-privacy').classList.toggle('is-personal-host',personal);
+      $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。社内レビュー用として利用し、納品時は独自ドメインなど個人名のない公開URLに変更してください。':'この配信URLが埋め込みコードに記載されます。納品前に公開URLを確認してください。';
       $('embed-code').value=code;
       $('export-warning').textContent='このコードはクラシックエディタの「テキスト」タブに貼り付けます。文字・ボタンはiframeの外側にあるためWordPressで編集できます。';
       $('copy-embed').disabled=false;
       try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
     }catch(error){
       $('embed-code').value='';
+      $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='利用できるHTTPSの配信URLを入力してください。';
       $('copy-embed').disabled=true;
       $('export-warning').textContent='公開URLが必要です。アプリ一式をGitHub Pages等へ公開し、そのフォルダURLを入力してください。ローカル表示テストは公開前でも利用できます。';
     }
