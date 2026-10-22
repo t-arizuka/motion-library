@@ -70,6 +70,33 @@ body.study-actual .footer{margin-top:auto}
  body.study-actual .hero.mobile{width:min(390px,100%)}
 }
 @media(prefers-reduced-motion:reduce){.study-view-choice{transition:none}}
+
+/* Material controls: the same fields and range style as the main editor. */
+.study-panel .color-controls{gap:11px}
+.study-panel .color-name{font-size:11px}
+.study-panel .color-control .hex-input{width:89px;font-size:11px}
+.study-panel .control-range{margin-bottom:19px}
+.study-panel .control-range:last-child{margin-bottom:0}
+.study-color-note,.study-material-note{font-size:10px;line-height:1.75;color:#99a4ae;margin:10px 0 0}
+.study-panel .setting-section{padding-block:19px}
+.study-panel .panel-title{margin-bottom:4px}
+.study-panel .study-view-choice{padding:12px}
+.study-panel .study-view-buttons{gap:7px}
+.study-panel .study-view-choice small{line-height:1.45}
+.study-panel .study-view-choice span{gap:4px}
+.study-panel .color-field label{cursor:default}
+.study-panel .color-control input:focus-visible,
+.study-panel .study-text-colors button:focus-visible{outline:2px solid #526b80;outline-offset:2px}
+.study-panel .study-quality{border-top:1px solid #edf0f2;padding:18px 0 0}
+.study-quality>summary{display:flex;align-items:center;cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:#586674}
+.study-quality>summary::-webkit-details-marker{display:none}
+.study-quality>summary::before{content:'＋';font-size:15px;color:#8998a5;margin-right:8px}
+.study-quality[open]>summary::before{content:'−'}
+.study-quality .study-review-points{padding-top:12px}
+.study-panel .study-locked-note{font-size:10px;line-height:1.7;color:#8998a5;background:#f7f9fa;border-radius:7px;padding:10px 12px;margin:15px 0 0}
+.study-compare-tip{font-size:10px;line-height:1.7;color:#8996a3;margin:9px 0 0}
+.study-panel .advanced{padding-block:16px}
+
 </style>
 </head>
 <body data-page="editor">
@@ -110,12 +137,12 @@ body.study-actual .footer{margin-top:auto}
         <span class="hero-watermark">SILK MATERIAL / STUDY</span>
       </div>
     </div>
-    <div class="preview-help"><span>静止状態のシルクの質感を確認するための検証版です。</span><span>原作の配色・照明は変更していません。</span></div>
+    <div class="preview-help"><span>静止状態のシルクの質感を確認するための検証版です。</span><span>調整前は原作の配色・照明です。色と素材感は右側から試せます。</span></div>
   </section>
   <aside class="editor-panel study-panel" aria-label="品質比較の設定">
     <div class="panel-title study-panel-title">
-      <div><div class="eyebrow">COMPARE / QUALITY GATE</div><h2>ビジュアル検証</h2></div>
-      <button type="button" class="reset-link" id="reset-study">初期化</button>
+      <div><div class="eyebrow">CUSTOMIZE / STATIC STUDY</div><h2>シルクを調整</h2></div>
+      <button type="button" class="reset-link" id="reset-study" title="選択中の作品の色と素材感を初期値に戻します">初期化</button>
     </div>
     <section class="setting-section">
       <div class="section-heading"><span class="section-number">01</span><h3>比較する作品</h3></div>
@@ -125,29 +152,41 @@ body.study-actual .footer{margin-top:auto}
       </div>
     </section>
     <section class="setting-section">
-      <div class="section-heading"><span class="section-number">02</span><h3>文字の見え方</h3></div>
+      <div class="section-heading"><span class="section-number">02</span><h3>カラー</h3></div>
+      <p class="section-help">色をクリック、またはHEXコードを直接入力</p>
+      <div class="color-controls" id="study-colors"></div>
+      <p class="study-color-note">布の陰影・ハイライトを残したまま色を変更します。</p>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">03</span><h3>素材感</h3></div>
+      <div id="study-material"></div>
+      <p class="study-material-note">静止画でも変化を確認できる項目です。</p>
+      <p class="study-locked-note">動きの速度は、静止ビジュアルの品質承認後に追加します。</p>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">04</span><h3>文字の見え方</h3></div>
       <div class="study-text-colors" role="group" aria-label="文字色を選択">
         <button type="button" data-copy="white" aria-pressed="true">白文字</button>
         <button type="button" data-copy="dark" aria-pressed="false">黒文字</button>
       </div>
       <p class="study-hint" style="margin-top:11px">上部の「文字を表示」で文字なしの構図も確認できます。</p>
     </section>
-    <section class="setting-section">
-      <div class="section-heading"><span class="section-number">03</span><h3>品質チェック</h3></div>
+    <details class="study-quality">
+      <summary>品質チェック項目</summary>
       <ul class="study-review-points">
         <li>布らしい光沢・陰影・奥行きがあるか</li>
         <li>キャッチコピーが読みやすいか</li>
         <li>PC・スマホともに構図が成立するか</li>
       </ul>
-    </section>
+    </details>
     <details class="advanced">
       <summary>検証について <span>必要な場合だけ</span></summary>
-      <p class="study-footnote">RadiantのMITライセンス作品を原作の質感・配色のまま静止化しました。アニメーション、色・速度の編集、WordPress用HTMLの書き出しは、静止画の品質承認後に実装します。</p>
+      <p class="study-footnote">RadiantのMITライセンス作品を静止化し、作品に適した色・素材の調整機能を追加しました。アニメーションとWordPress用HTML書き出しは、品質承認後の実装予定です。</p>
       <p class="study-footnote"><a href="https://radiant-shaders.com/shader/silk-cascade" target="_blank" rel="noopener noreferrer">Silk Cascade 公式 ↗</a> ／ <a href="https://radiant-shaders.com/shader/silk-groove" target="_blank" rel="noopener noreferrer">Silk Groove 公式 ↗</a></p>
     </details>
     <div class="panel-actions">
       <button type="button" id="open-large-preview" class="button-primary">大きく確認する <span aria-hidden="true">↗</span></button>
-      <p>品質検証中のため、ギャラリー掲載・WordPress用コード生成はまだ利用できません。</p>
+      <p>調整は静止画の比較専用です。WordPress用コード生成・正式ギャラリーへの掲載は品質承認後です。</p>
       <p class="study-state" id="study-state" aria-live="polite">静止ビジュアルの品質承認待ちです。</p>
     </div>
   </aside>
@@ -158,60 +197,161 @@ body.study-actual .footer{margin-top:auto}
 (() => {
   'use strict';
   const params = new URLSearchParams(location.search);
-  const types = {
-    cascade:{title:'Silk Cascade',src:'silk-cascade-static.html',number:'01'},
-    groove:{title:'Silk Groove',src:'silk-groove-static.html',number:'02'}
+  const variants = {
+    cascade:{
+      title:'Silk Cascade',src:'silk-cascade-static.html',number:'01',
+      colors:[
+        {key:'col1',label:'奥のシルク',value:'#806126'},
+        {key:'col2',label:'中間のシルク',value:'#6B2E38'},
+        {key:'col3',label:'手前のシルク',value:'#4D3873'},
+        {key:'background',label:'背景',value:'#0E0813'}
+      ],
+      sliders:[
+        {key:'sheen',label:'光沢の強さ',min:.3,max:2,step:.05,value:1},
+        {key:'layerOpacity',label:'布の重なり',min:.55,max:1.35,step:.05,value:1}
+      ]
+    },
+    groove:{
+      title:'Silk Groove',src:'silk-groove-static.html',number:'02',
+      colors:[
+        {key:'col1',label:'布の暗部',value:'#521217'},
+        {key:'col2',label:'布のゴールド',value:'#B38029'},
+        {key:'col3',label:'ハイライト',value:'#FFE08C'}
+      ],
+      sliders:[
+        {key:'foldDepth',label:'ひだの深さ',min:.5,max:1.6,step:.05,value:1},
+        {key:'gloss',label:'光沢の強さ',min:.3,max:1.8,step:.05,value:1}
+      ]
+    }
   };
-  const state = {
+  const hexOK = /^#[0-9a-fA-F]{6}$/;
+  const defaults=key=>({
+    colors:Object.fromEntries(variants[key].colors.map(x=>[x.key,x.value])),
+    material:Object.fromEntries(variants[key].sliders.map(x=>[x.key,x.value]))
+  });
+  const values={cascade:defaults('cascade'),groove:defaults('groove')};
+  const $=id=>document.getElementById(id);
+  const state={
     shader:params.get('shader')==='groove'?'groove':'cascade',
     device:params.get('device')==='mobile'?'mobile':'desktop',
     text:params.get('text')!=='0',
     color:params.get('color')==='dark'?'dark':'white'
   };
   const actual=params.get('view')==='actual';
-  const $=id=>document.getElementById(id);
   const hero=$('study-hero'),frame=$('study-frame'),gpu=$('gpu-status'),loading=$('shader-loading');
   let pollTimer=0, pollCount=0, requestSeq=0;
+  // Pass material settings into the separate large-size review page without storing personal data.
+  try{
+    const raw=params.get('settings');
+    if(raw&&raw.length<1800){
+      const parsed=JSON.parse(raw);
+      for(const key of Object.keys(variants)){
+        const p=parsed[key];
+        if(!p||typeof p!=='object')continue;
+        for(const entry of variants[key].colors){
+          const v=p.colors?.[entry.key];
+          if(typeof v==='string'&&hexOK.test(v))values[key].colors[entry.key]=v.toUpperCase();
+        }
+        for(const entry of variants[key].sliders){
+          const v=p.material?.[entry.key];
+          if(typeof v==='number'&&Number.isFinite(v)&&v>=entry.min&&v<=entry.max){
+            values[key].material[entry.key]=Math.round(v/entry.step)*entry.step;
+          }
+        }
+      }
+    }
+  }catch(e){/* Invalid review URL settings fall back to originals. */}
   const getReady=()=>{try{return frame.contentDocument?.documentElement?.dataset?.studyReady==='true'}catch(e){return false}};
+  function sendSettings(){
+    if(!frame.contentWindow)return;
+    const settings=values[state.shader];
+    frame.contentWindow.postMessage({
+      type:'motion-silk-study-settings',colors:settings.colors,...settings.material
+    },location.origin);
+  }
   function watchFrame(){
     clearTimeout(pollTimer);pollCount=0;const seq=++requestSeq;
-    loading.hidden=false;gpu.textContent='描画を確認中';gpu.classList.remove('ready','error');
+    loading.hidden=false;loading.textContent='WebGLシェーダーを確認中…';
+    gpu.textContent='描画を確認中';gpu.classList.remove('ready','error');
     function poll(){
       if(seq!==requestSeq)return;
       if(getReady()){
-        loading.hidden=true;
-        gpu.textContent='WebGL 描画完了';gpu.classList.add('ready');
-        $('study-state').textContent='実WebGLの静止フレームを読み込みました。品質の合格判定はまだです。';
+        loading.hidden=true;gpu.textContent='WebGL 描画完了';gpu.classList.add('ready');
+        $('study-state').textContent='調整は静止WebGLに反映されます。品質の合格判定はまだです。';
         return;
       }
       if(++pollCount<28){pollTimer=setTimeout(poll,150);return}
-      loading.textContent='WebGL描画を確認できません。ブラウザのGPU設定をご確認ください。';
+      loading.hidden=false;loading.textContent='WebGL描画を確認できません。ブラウザのGPU設定をご確認ください。';
       gpu.textContent='描画未確認';gpu.classList.add('error');
       $('study-state').textContent='このブラウザではWebGLの描画完了を確認できませんでした。';
     }
     pollTimer=setTimeout(poll,150);
   }
-  frame.addEventListener('load',watchFrame);
+  frame.addEventListener('load',()=>{watchFrame();sendSettings()});
+  function renderControls(){
+    const def=variants[state.shader],item=values[state.shader];
+    $('study-colors').innerHTML=def.colors.map(c=>
+      '<div class="color-field"><label class="color-name" for="study-color-'+c.key+'">'+c.label+'</label>'+
+      '<div class="color-control"><input type="color" data-silk-color="'+c.key+'" id="study-color-'+c.key+'" value="'+item.colors[c.key]+'" aria-label="'+c.label+'の色">'+
+      '<input type="text" class="hex-input" data-silk-hex="'+c.key+'" value="'+item.colors[c.key]+'" maxlength="7" spellcheck="false" aria-label="'+c.label+'のHEXコード"></div></div>'
+    ).join('');
+    $('study-material').innerHTML=def.sliders.map(s=>
+      '<div class="control-range"><div class="range-top"><label for="study-range-'+s.key+'">'+s.label+'</label>'+
+      '<output id="study-out-'+s.key+'">'+Number(item.material[s.key]).toFixed(2)+'</output></div>'+
+      '<input type="range" id="study-range-'+s.key+'" data-silk-range="'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+item.material[s.key]+'"></div>'
+    ).join('');
+    $('study-colors').querySelectorAll('[data-silk-color]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkColor;
+      item.colors[key]=input.value.toUpperCase();
+      $('study-colors').querySelector('[data-silk-hex="'+key+'"]').value=item.colors[key];
+      sendSettings();
+    }));
+    $('study-colors').querySelectorAll('[data-silk-hex]').forEach(input=>{
+      const key=input.dataset.silkHex;
+      const commit=()=>{
+        const v=input.value.trim().toUpperCase();
+        if(hexOK.test(v)){
+          item.colors[key]=v;
+          $('study-colors').querySelector('[data-silk-color="'+key+'"]').value=v;
+          input.classList.remove('invalid');sendSettings();
+        }else input.classList.add('invalid');
+      };
+      input.addEventListener('input',()=>{
+        if(hexOK.test(input.value.trim()))commit();
+        else input.classList.toggle('invalid',input.value.trim().length>=7);
+      });
+      input.addEventListener('blur',()=>{
+        if(!hexOK.test(input.value.trim())){input.value=item.colors[key];input.classList.remove('invalid')}
+      });
+      input.addEventListener('change',commit);
+    });
+    $('study-material').querySelectorAll('[data-silk-range]').forEach(input=>input.addEventListener('input',()=>{
+      const key=input.dataset.silkRange;
+      item.material[key]=Number(input.value);
+      $('study-out-'+key).textContent=Number(input.value).toFixed(2);
+      sendSettings();
+    }));
+  }
   function render(){
-    $('study-title').textContent=types[state.shader].title;
-    $('study-kicker').textContent='STUDY / '+types[state.shader].number;
-    const src=types[state.shader].src;
+    $('study-title').textContent=variants[state.shader].title;
+    $('study-kicker').textContent='STUDY / '+variants[state.shader].number;
+    const src=variants[state.shader].src;
     if(frame.getAttribute('src')!==src){
-      frame.title=types[state.shader].title+' 静止WebGL';
+      frame.title=variants[state.shader].title+' 静止WebGL';
       frame.setAttribute('src',src);
       watchFrame();
-    }
+    }else sendSettings();
     hero.classList.toggle('mobile',state.device==='mobile');
     hero.classList.toggle('hide-copy',!state.text);
     hero.classList.toggle('copy-dark',state.color==='dark');
     $('show-text').checked=state.text;
     document.querySelectorAll('[data-device]').forEach(btn=>{
       const on=btn.dataset.device===state.device;
-      btn.classList.toggle('active',on);
-      btn.setAttribute('aria-pressed',String(on));
+      btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',String(on));
     });
     document.querySelectorAll('[data-copy]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.copy===state.color)));
     document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.checked=el.value===state.shader);
+    renderControls();
   }
   document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>{
     state.device=btn.dataset.device;render();
@@ -220,21 +360,29 @@ body.study-actual .footer{margin-top:auto}
     state.color=btn.dataset.copy;render();
   }));
   document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.addEventListener('change',()=>{
-    if(el.checked){state.shader=el.value;render();}
+    if(el.checked){state.shader=el.value;render()}
   }));
   $('show-text').addEventListener('change',e=>{state.text=e.target.checked;render()});
   $('reset-study').addEventListener('click',()=>{
-    state.shader='cascade';state.device='desktop';state.text=true;state.color='white';render();
+    values[state.shader]=defaults(state.shader);render();
   });
+  function reviewURL(view){
+    const u=new URL(location.href);
+    u.searchParams.set('view',view);
+    u.searchParams.set('shader',state.shader);
+    u.searchParams.set('device',state.device);
+    u.searchParams.set('text',state.text?'1':'0');
+    u.searchParams.set('color',state.color);
+    u.searchParams.set('settings',JSON.stringify(values));
+    return u.href;
+  }
   $('open-large-preview').addEventListener('click',()=>{
-    const u=new URL(location.href);u.searchParams.set('view','actual');u.searchParams.set('shader',state.shader);
-    u.searchParams.set('device',state.device);u.searchParams.set('text',state.text?'1':'0');u.searchParams.set('color',state.color);
-    window.open(u.href,'_blank','noopener');
+    window.open(reviewURL('actual'),'_blank','noopener');
   });
   if(actual){
     document.body.classList.add('study-actual');
-    $('back-link').href='./index.html';
-    $('back-link').textContent='← 比較画面へ戻る';
+    $('back-link').href=reviewURL('editor');
+    $('back-link').textContent='← 調整画面へ戻る';
   }
   render();watchFrame();
   window.addEventListener('pagehide',()=>clearTimeout(pollTimer));
