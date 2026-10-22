@@ -118,6 +118,54 @@ body[data-page="editor"] .footer{padding-block:16px}
 .actual-preview-button:focus-visible{outline:2px solid #456980;outline-offset:2px}
 .actual-preview-button span{font-size:14px;font-weight:400}
 @media(prefers-reduced-motion:reduce){.actual-preview-button{transition:none}}
+
+/* 013: Simplified WordPress export (code is collapsed until needed). */
+.export-dialog-v2{width:min(620px,calc(100vw - 24px));max-height:min(92dvh,840px);overflow-y:auto;padding:clamp(18px,2.3vw,27px)}
+.export-dialog-v2 .embed-dialog-head h2{margin:6px 0 0;font-size:24px}
+.export-subheading{font-size:11px;line-height:1.7;color:#798695;margin:12px 0 0;max-width:475px}
+.export-dialog-v2 .embed-dialog-head{align-items:start;gap:12px}
+.export-section{margin-top:22px}
+.export-section-title{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.export-section-title h3{font-size:13px;margin:0;font-weight:700;letter-spacing:-.015em}
+.export-section-title label{cursor:pointer}
+.export-step{font-size:10px;letter-spacing:.08em;color:#9aa6b4;font-weight:800}
+.export-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.export-choice{cursor:pointer;display:flex;align-items:flex-start;gap:11px;border:1px solid #e0e5ea;border-radius:10px;padding:15px 13px 13px;min-width:0;min-height:81px;transition:background .15s,border-color .15s}
+.export-choice:hover{border-color:#b9c8d5}
+.export-choice:has(input:checked){border-color:#354d63;background:#f5f8fa;box-shadow:0 0 0 1px #354d63}
+.export-choice:focus-within{outline:2px solid #70869a;outline-offset:1px}
+.export-choice input{accent-color:#344b61;margin:3px 0 0;flex:0 0 auto}
+.export-choice span{display:flex;flex-direction:column;gap:6px}
+.export-choice strong{font-size:12px;color:#27384b}
+.export-choice small{font-size:10px;line-height:1.6;color:#8a95a2}
+.export-host-section{margin-top:19px}
+.export-host-section>input{display:block;width:100%;min-width:0;padding:11px 12px;border:1px solid #d8e0e8;border-radius:8px;color:#36485a;font:12px ui-monospace,Consolas,monospace;box-sizing:border-box}
+.export-host-section .source-privacy{margin:8px 0 0;font-size:10px;line-height:1.6}
+.export-host-section .source-privacy.is-personal-host{padding:10px 11px;font-size:10px}
+.export-output-summary{border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;margin-top:19px;padding:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.export-output-summary>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.export-output-summary span{font-size:10px;color:#95a0aa}
+.export-output-summary strong{font-size:12px;font-weight:650;color:#34485b;overflow-wrap:anywhere}
+.export-dialog-v2 .export-warning{min-height:0;margin:13px 0 0;font-size:10px;line-height:1.65;color:#6f8292}
+.export-dialog-v2 .embed-dialog-actions{margin:15px 0 0;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:9px}
+.export-dialog-v2 .embed-dialog-actions .button-primary{min-width:0;justify-content:space-between;padding:13px 14px}
+.export-dialog-v2 .embed-dialog-actions .button-muted{min-width:0;padding:13px 10px}
+.export-code-details{margin-top:19px;padding-top:16px;border-top:1px solid #edf0f2}
+.export-code-details>summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;color:#657788;font-size:11px;font-weight:650}
+.export-code-details>summary::-webkit-details-marker{display:none}
+.export-code-details>summary:before{content:'＋';font-size:14px;color:#8c9ba6}
+.export-code-details[open]>summary:before{content:'−'}
+.export-code-details>summary span{margin-left:auto;font-weight:400;color:#a0aab4;font-size:10px}
+.export-dialog-v2 #embed-code{width:100%;height:135px;min-height:90px;margin-top:12px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;overflow-x:hidden;padding:12px;font:11px/1.7 ui-monospace,Consolas,monospace;color:#46586c;background:#f9fafb;border:1px solid #e1e6ec;border-radius:8px}
+.export-dialog-v2 .embed-caveat{font-size:10px;margin-top:15px;line-height:1.7}
+@media(max-width:540px){
+  .export-dialog-v2{padding:20px 16px}
+  .export-choice-grid{grid-template-columns:1fr}
+  .export-choice{min-height:0;padding:12px}
+  .export-dialog-v2 .embed-dialog-actions{grid-template-columns:1fr}
+  .export-dialog-v2 .embed-dialog-actions .button-muted{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.export-choice{transition:none}}
 </style><script type="module">/** Visual engines are referenced, not vendored; see LICENSE_NOTES.md. */
 const  ENGINE_URL='https://esm.sh/@paper-design/shaders@0.0.78?bundle';
 const  TEMPLATES={
@@ -372,27 +420,32 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     const stored=localStorage.getItem('ml-publish-base')||'';
     publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
   }catch(e){}
-  const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()));
+  const sizeLabel=()=>{
+    const size=getLayout();
+    return (size.maxWidth===null?'幅100%':'最大幅'+size.maxWidth+'px')+' / 高さ 最大'+size.maxHeight+'px（画面高70%を基準）';
+  };
   $('open-actual-preview').addEventListener('click',()=>{
     const url=actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),showCopy);
     window.open(url,'_blank','noopener');
   });
   function refreshExport(){
     const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    $('export-template-name').textContent=TEMPLATES[editorId].title;
+    $('export-dimensions').textContent=sizeLabel();
     try{
       const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode,deepCopy(getLayout()));
       const host=normalizePublishUrl(publishUrl.value).hostname.toLowerCase(),personal=host.endsWith('.github.io');
       $('source-privacy').classList.toggle('is-personal-host',personal);
       $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。社内レビュー用として利用し、納品時は独自ドメインなど個人名のない公開URLに変更してください。':'この配信URLが埋め込みコードに記載されます。納品前に公開URLを確認してください。';
       $('embed-code').value=code;
-      $('export-warning').textContent='このコードはクラシックエディタの「テキスト」タブに貼り付けます。文字・ボタンはiframeの外側にあるためWordPressで編集できます。';
+      $('export-warning').textContent=mode==='background'?'背景のみを出力します。既存テーマで文字を重ねる場合は、MVの親要素内に配置してください。':'文字・ボタンはWordPressのHTMLとして編集できます。クラシックエディタの「テキスト」タブへ貼り付けてください。';
       $('copy-embed').disabled=false;
       try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
     }catch(error){
       $('embed-code').value='';
       $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='利用できるHTTPSの配信URLを入力してください。';
       $('copy-embed').disabled=true;
-      $('export-warning').textContent='公開URLが必要です。アプリ一式をGitHub Pages等へ公開し、そのフォルダURLを入力してください。ローカル表示テストは公開前でも利用できます。';
+      $('export-warning').textContent=error.message||'公開済みHTTPSの配信URLを入力してください。';
     }
   }
   $('export-wp').addEventListener('click',()=>{refreshExport();embedDialog.showModal();});
@@ -409,8 +462,8 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     else toast('Ctrl+Cでコピーしてください');
   });
   $('download-test').addEventListener('click',()=>{
-    window.open(localTest(),'_blank','noopener');
-    toast('重ね表示の確認ページを開きました');
+    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    window.open(actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),mode==='with-text'),'_blank','noopener');
   });
   window.addEventListener('pagehide',()=>{cancelAnimationFrame(paintFrame);currentMount?.dispose();});
   startEditorRender();
@@ -439,10 +492,29 @@ Object.defineProperty(window,'motionLibraryState',{get(){return {page:PAGE,templ
 <section class="setting-section display-size-section"><div class="section-heading"><span class="section-number">03</span><h3>表示サイズ</h3></div><div class="display-size-fields"><label>最大幅 <select id="width-mode" class="size-mode-select" aria-label="最大幅の指定方法"><option value="fluid">100%（標準）</option><option value="fixed">px指定</option></select><span id="fixed-width-control" class="unit-input" hidden><input id="max-width" type="number" min="320" max="2560" step="10" value="1440" inputmode="numeric" aria-label="最大幅（ピクセル）"><span>px</span></span></label><label>最大高さ <span class="unit-input"><input id="max-height" type="number" min="360" max="1200" step="10" value="760" inputmode="numeric" aria-label="最大高さ（ピクセル）"><span>px</span></span></label></div><p class="size-note">画面幅に合わせて縮小し、設定値を超えません。</p><button type="button" class="actual-preview-button" id="open-actual-preview" aria-label="新しいタブで実寸プレビューを開く">実寸プレビュー <span aria-hidden="true">↗</span></button></section>
 <details class="advanced"><summary>細かい調整 <span>必要な場合だけ</span></summary><div id="advanced-settings"></div></details>
 <div class="panel-actions"><button type="button" id="export-wp" class="button-primary">WordPress用HTMLを取得 <span aria-hidden="true">↗</span></button><div class="secondary-actions"><button type="button" id="save" class="button-muted">設定を保存</button><button type="button" id="load" class="button-muted">設定を読み込む</button></div><input hidden id="load-file" type="file" accept=".json,application/json"><p>編集した色と動きが埋め込み先へ反映されます。</p></div></aside></main>
-<footer class="footer"><span>Motion Library — Gallery / Editor 007</span></footer></div><dialog id="embed-dialog" class="embed-dialog" aria-labelledby="embed-heading">
-  <div class="embed-dialog-head"><div><span class="eyebrow">EXPORT / NO PLUGIN</span><h2 id="embed-heading">クラシックエディタ用HTML</h2></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
-  <p class="embed-description">プラグイン不要。WordPressの「テキスト」タブに貼り付けます。文字・ボタンはWordPress側のHTMLとして自由に編集できます。</p>
-  <div class="export-options"><label for="publish-url">アニメーションの配信URL（HTTPS）</label><input id="publish-url" type="url" placeholder="https://motion.example.com/" autocomplete="url" spellcheck="false"><p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p><div class="export-mode"><label><input type="radio" name="export-mode" value="with-text" checked> 背景＋文字・ボタン</label><label><input type="radio" name="export-mode" value="background"> 背景のみ</label></div></div><p id="export-warning" class="export-warning" role="status" aria-live="polite"></p><textarea id="embed-code" readonly spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
-  <div class="embed-dialog-actions"><button type="button" id="copy-embed" class="button-primary">コードをコピー <span aria-hidden="true">⧉</span></button><button type="button" id="download-test" class="button-muted">重ね表示をテスト</button></div>
-  <p class="embed-caveat">※ iframeが許可されるWordPress環境・公開HTTPS URLが必要です。外部シェーダーの読み込みとWebGL2対応が必要です。</p>
+<footer class="footer"><span>Motion Library — Gallery / Editor 007</span></footer></div><dialog id="embed-dialog" class="embed-dialog export-dialog-v2" aria-labelledby="embed-heading">
+  <div class="embed-dialog-head"><div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">クラシックエディタの「テキスト」タブに貼り付けます。専用プラグインは不要です。</p></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
+  <section class="export-section" aria-labelledby="export-mode-heading">
+    <div class="export-section-title"><span class="export-step">01</span><h3 id="export-mode-heading">出力する内容</h3></div>
+    <div class="export-choice-grid">
+      <label class="export-choice"><input type="radio" name="export-mode" value="with-text" checked><span><strong>MVセット</strong><small>WordPress側で文字・ボタンも編集</small></span></label>
+      <label class="export-choice"><input type="radio" name="export-mode" value="background"><span><strong>背景のみ</strong><small>既存テーマの文字の背面に配置</small></span></label>
+    </div>
+  </section>
+  <section class="export-section export-host-section" aria-labelledby="export-host-heading">
+    <div class="export-section-title"><span class="export-step">02</span><h3 id="export-host-heading"><label for="publish-url">配信元URL</label></h3></div>
+    <input id="publish-url" type="url" placeholder="https://motion.example.com/" autocomplete="url" spellcheck="false" aria-describedby="source-privacy">
+    <p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p>
+  </section>
+  <div class="export-output-summary" aria-live="polite">
+    <div><span>背景</span><strong id="export-template-name">Mesh Gradient</strong></div>
+    <div><span>出力サイズ</span><strong id="export-dimensions">幅100% / 高さ最大760px</strong></div>
+  </div>
+  <p id="export-warning" class="export-warning" role="status" aria-live="polite"></p>
+  <div class="embed-dialog-actions">
+    <button type="button" id="copy-embed" class="button-primary">WordPress用HTMLをコピー <span aria-hidden="true">⧉</span></button>
+    <button type="button" id="download-test" class="button-muted">実寸プレビュー ↗</button>
+  </div>
+  <details class="export-code-details"><summary>生成コードを見る <span>必要な場合だけ</span></summary><textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea></details>
+  <p class="embed-caveat">※ 公開HTTPS URL・iframeを許可するWordPress環境が必要です。既存テーマに重ねる場合は配置調整が必要です。</p>
 </dialog><div class="toast" id="toast" role="status" aria-live="polite"></div></body></html>
