@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Silk Study 001.2 — Shader-specific GUI controls (2026-10-22)
+- 既存Mesh/Grainと同じ編集パネル内に、Silk専用のカラー・素材調整を追加。
+- Cascade: 奥/中/手前/背景の4色・光沢・布の重なり。Groove: 暗部/ゴールド/ハイライトの3色・ひだの深さ・光沢。
+- GLSL uniformを更新し、入力時だけ静止WebGLを再描画。色変更でも陰影を維持する方式を採用。
+- 作品別の編集値を保持し、大きいプレビューにも設定を引き継ぐ。速度やWordPress書き出しは未実装。
+- WebGLモックによる受信値・再描画・同一オリジン制限は検査済み。実GPUによる画質判定は未実施。
+
 ## Silk Study 001.1 — Approved editor UI alignment (2026-10-22)
 - Silk静止検証ページのUIを、承認済みMesh/Grain編集画面の共通CSS・ヘッダー・左右2カラム・操作系に統一。
 - 作品の切り替え、PC/スマホ、文字表示/白黒、初期化、大きいプレビューを実装し操作ロジックを確認。
