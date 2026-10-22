@@ -472,7 +472,7 @@ body.study-actual .preview-area{max-width:100%}
   });
   if(actual){
     document.body.classList.add('study-actual');
-    $('back-link').href=reviewURL('editor');
+    $('back-link').href=new URL('silk.html',location.href).href;
     $('back-link').textContent='← 調整画面へ戻る';
   }
 
@@ -645,6 +645,7 @@ body.study-actual .preview-area{max-width:100%}
     finally{event.target.value=''}
   });
 
+  if(actual)$('back-link').href=reviewURL('editor');
   render();watchFrame();
   window.addEventListener('pagehide',()=>clearTimeout(pollTimer));
 })();
