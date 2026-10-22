@@ -18,10 +18,29 @@
 <section class="setting-section display-size-section"><div class="section-heading"><span class="section-number">03</span><h3>表示サイズ</h3></div><div class="display-size-fields"><label>最大幅 <select id="width-mode" class="size-mode-select" aria-label="最大幅の指定方法"><option value="fluid">100%（標準）</option><option value="fixed">px指定</option></select><span id="fixed-width-control" class="unit-input" hidden><input id="max-width" type="number" min="320" max="2560" step="10" value="1440" inputmode="numeric" aria-label="最大幅（ピクセル）"><span>px</span></span></label><label>最大高さ <span class="unit-input"><input id="max-height" type="number" min="360" max="1200" step="10" value="760" inputmode="numeric" aria-label="最大高さ（ピクセル）"><span>px</span></span></label></div><p class="size-note">画面幅に合わせて縮小し、設定値を超えません。</p><button type="button" class="actual-preview-button" id="open-actual-preview" aria-label="新しいタブで実寸プレビューを開く">実寸プレビュー <span aria-hidden="true">↗</span></button></section>
 <details class="advanced"><summary>細かい調整 <span>必要な場合だけ</span></summary><div id="advanced-settings"></div></details>
 <div class="panel-actions"><button type="button" id="export-wp" class="button-primary">WordPress用HTMLを取得 <span aria-hidden="true">↗</span></button><div class="secondary-actions"><button type="button" id="save" class="button-muted">設定を保存</button><button type="button" id="load" class="button-muted">設定を読み込む</button></div><input hidden id="load-file" type="file" accept=".json,application/json"><p>編集した色と動きが埋め込み先へ反映されます。</p></div></aside></main>
-<footer class="footer"><span>Motion Library — Gallery / Editor 007</span></footer></div><dialog id="embed-dialog" class="embed-dialog" aria-labelledby="embed-heading">
-  <div class="embed-dialog-head"><div><span class="eyebrow">EXPORT / NO PLUGIN</span><h2 id="embed-heading">クラシックエディタ用HTML</h2></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
-  <p class="embed-description">プラグイン不要。WordPressの「テキスト」タブに貼り付けます。文字・ボタンはWordPress側のHTMLとして自由に編集できます。</p>
-  <div class="export-options"><label for="publish-url">アニメーションの配信URL（HTTPS）</label><input id="publish-url" type="url" placeholder="https://motion.example.com/" autocomplete="url" spellcheck="false"><p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p><div class="export-mode"><label><input type="radio" name="export-mode" value="with-text" checked> 背景＋文字・ボタン</label><label><input type="radio" name="export-mode" value="background"> 背景のみ</label></div></div><p id="export-warning" class="export-warning" role="status" aria-live="polite"></p><textarea id="embed-code" readonly spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
-  <div class="embed-dialog-actions"><button type="button" id="copy-embed" class="button-primary">コードをコピー <span aria-hidden="true">⧉</span></button><button type="button" id="download-test" class="button-muted">重ね表示をテスト</button></div>
-  <p class="embed-caveat">※ iframeが許可されるWordPress環境・公開HTTPS URLが必要です。外部シェーダーの読み込みとWebGL2対応が必要です。</p>
+<footer class="footer"><span>Motion Library — Gallery / Editor 007</span></footer></div><dialog id="embed-dialog" class="embed-dialog export-dialog-v2" aria-labelledby="embed-heading">
+  <div class="embed-dialog-head"><div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">クラシックエディタの「テキスト」タブに貼り付けます。専用プラグインは不要です。</p></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
+  <section class="export-section" aria-labelledby="export-mode-heading">
+    <div class="export-section-title"><span class="export-step">01</span><h3 id="export-mode-heading">出力する内容</h3></div>
+    <div class="export-choice-grid">
+      <label class="export-choice"><input type="radio" name="export-mode" value="with-text" checked><span><strong>MVセット</strong><small>WordPress側で文字・ボタンも編集</small></span></label>
+      <label class="export-choice"><input type="radio" name="export-mode" value="background"><span><strong>背景のみ</strong><small>既存テーマの文字の背面に配置</small></span></label>
+    </div>
+  </section>
+  <section class="export-section export-host-section" aria-labelledby="export-host-heading">
+    <div class="export-section-title"><span class="export-step">02</span><h3 id="export-host-heading"><label for="publish-url">配信元URL</label></h3></div>
+    <input id="publish-url" type="url" placeholder="https://motion.example.com/" autocomplete="url" spellcheck="false" aria-describedby="source-privacy">
+    <p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p>
+  </section>
+  <div class="export-output-summary" aria-live="polite">
+    <div><span>背景</span><strong id="export-template-name">Mesh Gradient</strong></div>
+    <div><span>出力サイズ</span><strong id="export-dimensions">幅100% / 高さ最大760px</strong></div>
+  </div>
+  <p id="export-warning" class="export-warning" role="status" aria-live="polite"></p>
+  <div class="embed-dialog-actions">
+    <button type="button" id="copy-embed" class="button-primary">WordPress用HTMLをコピー <span aria-hidden="true">⧉</span></button>
+    <button type="button" id="download-test" class="button-muted">実寸プレビュー ↗</button>
+  </div>
+  <details class="export-code-details"><summary>生成コードを見る <span>必要な場合だけ</span></summary><textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea></details>
+  <p class="embed-caveat">※ 公開HTTPS URL・iframeを許可するWordPress環境が必要です。既存テーマに重ねる場合は配置調整が必要です。</p>
 </dialog><div class="toast" id="toast" role="status" aria-live="polite"></div></body></html>
