@@ -252,27 +252,32 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     const stored=localStorage.getItem('ml-publish-base')||'';
     publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
   }catch(e){}
-  const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()));
+  const sizeLabel=()=>{
+    const size=getLayout();
+    return (size.maxWidth===null?'幅100%':'最大幅'+size.maxWidth+'px')+' / 高さ 最大'+size.maxHeight+'px（画面高70%を基準）';
+  };
   $('open-actual-preview').addEventListener('click',()=>{
     const url=actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),showCopy);
     window.open(url,'_blank','noopener');
   });
   function refreshExport(){
     const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    $('export-template-name').textContent=TEMPLATES[editorId].title;
+    $('export-dimensions').textContent=sizeLabel();
     try{
       const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode,deepCopy(getLayout()));
       const host=normalizePublishUrl(publishUrl.value).hostname.toLowerCase(),personal=host.endsWith('.github.io');
       $('source-privacy').classList.toggle('is-personal-host',personal);
       $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。社内レビュー用として利用し、納品時は独自ドメインなど個人名のない公開URLに変更してください。':'この配信URLが埋め込みコードに記載されます。納品前に公開URLを確認してください。';
       $('embed-code').value=code;
-      $('export-warning').textContent='このコードはクラシックエディタの「テキスト」タブに貼り付けます。文字・ボタンはiframeの外側にあるためWordPressで編集できます。';
+      $('export-warning').textContent=mode==='background'?'背景のみを出力します。既存テーマで文字を重ねる場合は、MVの親要素内に配置してください。':'文字・ボタンはWordPressのHTMLとして編集できます。クラシックエディタの「テキスト」タブへ貼り付けてください。';
       $('copy-embed').disabled=false;
       try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
     }catch(error){
       $('embed-code').value='';
       $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='利用できるHTTPSの配信URLを入力してください。';
       $('copy-embed').disabled=true;
-      $('export-warning').textContent='公開URLが必要です。アプリ一式をGitHub Pages等へ公開し、そのフォルダURLを入力してください。ローカル表示テストは公開前でも利用できます。';
+      $('export-warning').textContent=error.message||'公開済みHTTPSの配信URLを入力してください。';
     }
   }
   $('export-wp').addEventListener('click',()=>{refreshExport();embedDialog.showModal();});
@@ -289,8 +294,8 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     else toast('Ctrl+Cでコピーしてください');
   });
   $('download-test').addEventListener('click',()=>{
-    window.open(localTest(),'_blank','noopener');
-    toast('重ね表示の確認ページを開きました');
+    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
+    window.open(actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),mode==='with-text'),'_blank','noopener');
   });
   window.addEventListener('pagehide',()=>{cancelAnimationFrame(paintFrame);currentMount?.dispose();});
   startEditorRender();
