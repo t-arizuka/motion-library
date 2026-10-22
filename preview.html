@@ -109,7 +109,8 @@ function render(){
     ?'最大高さ確認モード：指定上限の'+h+'pxで表示中。実際のWordPress表示は画面高70%が基準です。'
     :'通常モード：WordPress用コードと同じ「画面高70%・最大'+h+'px」で表示しています。';
 }
-document.getElementById('close').addEventListener('click',e=>{if(history.length>1){e.preventDefault();window.close();}});
+const template=params.get('template');
+document.getElementById('close').href='editor.html?template='+(template==='grain'?'grain':'mesh');
 showMax.addEventListener('change',render);
 showCopy.addEventListener('change',render);
 window.addEventListener('resize',render);
