@@ -1,7 +1,7 @@
 # Silk Material Study 001 — 品質検証・実装設計
 
 更新日: 2026-10-22
-状態: **Silk Cascadeアニメーション試作済み／動画品質の承認待ち**（正式ライブラリ未収録）
+状態: **Silk Cascadeの静止ビジュアル・動きはユーザー承認済み。正式版は `../../silk.html` と `../../embed/silk/v1/` に移管。Silk Grooveは引き続き比較試作。**
 
 ## 1. 方針と優先順位
 第一候補 **Silk Cascade**、比較対象 **Silk Groove**。
@@ -117,3 +117,12 @@ Radiant (MIT); Copyright (c) 2025 Paul Bakaus.
 - ⏳ WordPress用コード生成、正式ギャラリー収録（アニメーションのビジュアル承認後に着手）。
 
 **品質ゲート:** 動きと光沢が不自然・安っぽい・文字を邪魔する場合は不合格。正式収録しない。
+
+## 9. 品質ゲート承認と正式収録（2026-10-22）
+
+ユーザーがSilk Cascadeの動きの品質をOKと判定したため、アニメーション品質ゲートは合格。色変更も既に承認済み。
+- 正式ギャラリー: `../../index.html` 3作品目。
+- 正式編集画面: `../../silk.html` （素材と動きのGUI、表示サイズ、実寸、WordPress出力、設定保存・読込）
+- WordPress固定レンダラー: `../../embed/silk/v1/index.html`, `shader.html`, `LICENSE-RADIANT.txt`。
+- `studies/silk-material-001/` は比較履歴として維持。Silk Grooveは未承認。
+- WordPressクラシックエディタでの実運用テスト・外部GPU環境は、この実装作業では未検証。
