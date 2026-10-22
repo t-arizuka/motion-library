@@ -43,6 +43,11 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     'uniform vec2 u_res;',
     'uniform float u_flowSpeed;',
     'uniform float u_sheenIntensity;',
+    'uniform float u_layerOpacity;',
+    'uniform vec3 u_background;',
+    'uniform vec3 u_col1;',
+    'uniform vec3 u_col2;',
+    'uniform vec3 u_col3;',
     'uniform vec2 u_mouse;',
     '',
     '#define PI 3.14159265359',
@@ -232,22 +237,22 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  ));',
     '  vec3 V=vec3(0.0, 0.0, 1.0);',
     '',
-    '  // Background — deep dark with purple tint',
+    '  // Background — proportional remapping retains the original dark gradient',
     '  float bgD=length(p);',
     '  vec3 bg=mix(',
-    '    vec3(0.055, 0.03, 0.075),',
-    '    vec3(0.012, 0.006, 0.02),',
+    '    u_background,',
+    '    u_background * vec3(0.21818, 0.20, 0.26667),',
     '    smoothstep(0.0, 1.0, bgD)',
     '  );',
-    '  bg+=vec3(0.025, 0.012, 0.035)*exp(-bgD*bgD*2.0);',
+    '  bg+=u_background*vec3(0.45454, 0.4, 0.46667)*exp(-bgD*bgD*2.0);',
     '',
     '  // Layer 1: Deep — warm gold/champagne (slowest, most transparent)',
     '  vec4 ly1=shadeLayer(',
     '    p*0.8+vec2(0.15, t*0.015), t,',
     '    0.0, 2.0, 0.5,',
-    '    vec3(0.10, 0.06, 0.02),',
-    '    vec3(0.50, 0.38, 0.15),',
-    '    vec3(0.80, 0.65, 0.32),',
+    '    vec3(0.10, 0.06, 0.02)*u_col1/vec3(0.50,0.38,0.15),',
+    '    u_col1,',
+    '    vec3(0.80, 0.65, 0.32)*u_col1/vec3(0.50,0.38,0.15),',
     '    vec3(1.0, 0.92, 0.65),',
     '    0.30, 26.0,',
     '    L1, L2, V,',
@@ -258,9 +263,9 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  vec4 ly2=shadeLayer(',
     '    p*1.0+vec2(t*0.012, -0.1), t,',
     '    1.0, 3.2, 0.75,',
-    '    vec3(0.08, 0.03, 0.04),',
-    '    vec3(0.42, 0.18, 0.22),',
-    '    vec3(0.72, 0.38, 0.42),',
+    '    vec3(0.08, 0.03, 0.04)*u_col2/vec3(0.42,0.18,0.22),',
+    '    u_col2,',
+    '    vec3(0.72, 0.38, 0.42)*u_col2/vec3(0.42,0.18,0.22),',
     '    vec3(1.0, 0.82, 0.86),',
     '    0.38, 40.0,',
     '    L1, L2, V,',
@@ -271,9 +276,9 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  vec4 ly3=shadeLayer(',
     '    p*1.2+vec2(-t*0.008, t*0.02), t,',
     '    2.0, 4.5, 1.0,',
-    '    vec3(0.06, 0.04, 0.10),',
-    '    vec3(0.30, 0.22, 0.45),',
-    '    vec3(0.58, 0.48, 0.72),',
+    '    vec3(0.06, 0.04, 0.10)*u_col3/vec3(0.30,0.22,0.45),',
+    '    u_col3,',
+    '    vec3(0.58, 0.48, 0.72)*u_col3/vec3(0.30,0.22,0.45),',
     '    vec3(1.0, 0.90, 0.97),',
     '    0.50, 55.0,',
     '    L1, L2, V,',
@@ -281,6 +286,9 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     '  );',
     '',
     '  // Composite back-to-front',
+    '  ly1.a=clamp(ly1.a*u_layerOpacity,0.0,1.0);',
+    '  ly2.a=clamp(ly2.a*u_layerOpacity,0.0,1.0);',
+    '  ly3.a=clamp(ly3.a*u_layerOpacity,0.0,1.0);',
     '  vec3 col=bg;',
     '  col=mix(col, ly1.rgb, ly1.a);',
     '  col+=vec3(0.35, 0.18, 0.08)*ly1.a*ly2.a*0.08;',
@@ -346,6 +354,13 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
   var uFlowSpeed = gl.getUniformLocation(prog, 'u_flowSpeed');
   var uSheenIntensity = gl.getUniformLocation(prog, 'u_sheenIntensity');
   var uMouse = gl.getUniformLocation(prog, 'u_mouse');
+  var uLayerOpacity=gl.getUniformLocation(prog,'u_layerOpacity');
+  var uBackground=gl.getUniformLocation(prog,'u_background');
+  var uColor1=gl.getUniformLocation(prog,'u_col1');
+  var uColor2=gl.getUniformLocation(prog,'u_col2');
+  var uColor3=gl.getUniformLocation(prog,'u_col3');
+  var layerOpacityVal=1.0;
+  var colors={col1:[0.50,0.38,0.15],col2:[0.42,0.18,0.22],col3:[0.30,0.22,0.45],background:[0.055,0.03,0.075]};
   var flowSpeedVal = 0.4;
   var sheenIntensityVal = 1.0;
 
@@ -380,6 +395,11 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
     gl.uniform1f(uTime, prefersReduced ? 0.0 : now * 0.001);
     gl.uniform1f(uFlowSpeed, flowSpeedVal);
     gl.uniform1f(uSheenIntensity, sheenIntensityVal);
+    gl.uniform1f(uLayerOpacity,layerOpacityVal);
+    gl.uniform3fv(uBackground,colors.background);
+    gl.uniform3fv(uColor1,colors.col1);
+    gl.uniform3fv(uColor2,colors.col2);
+    gl.uniform3fv(uColor3,colors.col3);
     gl.uniform2f(uMouse, mouseX, mouseY);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     document.documentElement.dataset.studyReady = "true";
@@ -418,13 +438,23 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
   });
   observer.observe(canvas);
 
+  function colorFromHex(hex) {
+    if(typeof hex!=='string'||!/^#[0-9a-fA-F]{6}$/.test(hex))return null;
+    return [1,3,5].map(function(i){return parseInt(hex.slice(i,i+2),16)/255});
+  }
+  function bounded(n,lo,hi) { return typeof n==='number'&&Number.isFinite(n)?Math.max(lo,Math.min(hi,n)):null; }
+  // Only the same-origin parent review UI can modify this frozen shader.
   window.addEventListener('message', function(e) {
-    if (e.data && e.data.type === 'param') {
-      switch (e.data.name) {
-        case 'FLOW_SPEED': flowSpeedVal = e.data.value; break;
-        case 'SHEEN_INTENSITY': sheenIntensityVal = e.data.value; break;
-      }
+    if(e.source!==window.parent||e.origin!==location.origin||!e.data||e.data.type!=='motion-silk-study-settings')return;
+    var d=e.data;
+    if(d.colors&&typeof d.colors==='object') {
+      ['col1','col2','col3','background'].forEach(function(key){
+        var v=colorFromHex(d.colors[key]); if(v)colors[key]=v;
+      });
     }
+    var shiny=bounded(d.sheen,0.3,2);if(shiny!==null)sheenIntensityVal=shiny;
+    var opacity=bounded(d.layerOpacity,0.55,1.35);if(opacity!==null)layerOpacityVal=opacity;
+    if(running&&document.visibilityState!=='hidden')requestAnimationFrame(render);
   });
 })();
 </script>
