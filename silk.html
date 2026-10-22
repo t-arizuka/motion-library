@@ -525,7 +525,7 @@ body.study-actual .preview-area{max-width:100%}
       backdrop.style.marginInline='auto';
     }
   }
-  try{
+  if(!actual)try{
     const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
     if(stored)values.cascade=validateSettings(stored);
   }catch(e){console.warn('Silkの保存設定を読み込めません',e)}
