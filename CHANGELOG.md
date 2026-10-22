@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Silk Cascade Animation Prototype 001 — Motion study (2026-10-22)
+- Silk CascadeのWebGL描画に30fps上限のアニメーション再生と再生／一時停止を実装。
+- GUIに速度、揺れ幅、流れのなめらかさを追加。色・素材・作品比較・実寸プレビューを維持。
+- 非表示タブ、画面外、prefers-reduced-motionへの配慮と、シェーダー設定のセキュアな送受信を維持。
+- Silk Grooveは引き続き静止。Mesh／Grain本体とWordPress出力には変更なし。
+- モックWebGLで停止・再開・上限fps・シェーダーuniformの検査を実施。ブラウザ実GPUの画質・負荷は未検証。
+
 ## Silk Study 001.2 — Shader-specific GUI controls (2026-10-22)
 - 既存Mesh/Grainと同じ編集パネル内に、Silk専用のカラー・素材調整を追加。
 - Cascade: 奥/中/手前/背景の4色・光沢・布の重なり。Groove: 暗部/ゴールド/ハイライトの3色・ひだの深さ・光沢。
