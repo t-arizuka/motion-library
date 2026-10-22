@@ -111,3 +111,10 @@ body[data-page="editor"] .footer{padding-block:16px}
 .size-mode-select:focus-visible{outline:2px solid #536c80;outline-offset:1px}
 .display-size-fields .unit-input[hidden]{display:none!important}
 #fixed-width-control{margin-top:6px}
+
+/* 012: Secondary action for separate actual-size preview. */
+.actual-preview-button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding:11px 13px;border:1px solid #dfe5eb;border-radius:8px;background:#f8fafb;color:#405468;font-size:12px;font-weight:650;text-align:left;transition:background .15s,border-color .15s}
+.actual-preview-button:hover{background:#eff3f6;border-color:#bdcbd6}
+.actual-preview-button:focus-visible{outline:2px solid #456980;outline-offset:2px}
+.actual-preview-button span{font-size:14px;font-weight:400}
+@media(prefers-reduced-motion:reduce){.actual-preview-button{transition:none}}
