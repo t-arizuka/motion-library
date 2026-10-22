@@ -85,6 +85,15 @@ function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layou
 function localPreviewUrl(template,settings,layout=LAYOUT_DEFAULT){
   const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));const v=validateLayout(layout);u.searchParams.set('w',v.maxWidth===null?'100%':String(v.maxWidth));u.searchParams.set('h',v.maxHeight);return u.href;
 }
+function actualSizePreviewUrl(template,settings,layout=LAYOUT_DEFAULT,withText=true){
+  const size=validateLayout(layout),u=new URL('preview.html',location.href);
+  u.searchParams.set('data',encodeConfig(template,settings));
+  u.searchParams.set('template',template);
+  u.searchParams.set('w',size.maxWidth===null?'100%':String(size.maxWidth));
+  u.searchParams.set('h',String(size.maxHeight));
+  u.searchParams.set('text',withText?'1':'0');
+  return u.href;
+}
 
 
 
@@ -244,6 +253,10 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
   }catch(e){}
   const localTest=()=>localPreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()));
+  $('open-actual-preview').addEventListener('click',()=>{
+    const url=actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),showCopy);
+    window.open(url,'_blank','noopener');
+  });
   function refreshExport(){
     const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
     try{
