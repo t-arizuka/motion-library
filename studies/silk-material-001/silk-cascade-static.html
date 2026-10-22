@@ -32,7 +32,7 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
   var canvas = document.getElementById('canvas');
   var prefersReduced = true; // Motion Library 001: static quality verification only
 
-  var gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false });
+  var gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
   if (!gl) return;
 
   var vertSrc = 'attribute vec2 a_pos; void main(){gl_Position=vec4(a_pos,0,1);}';
