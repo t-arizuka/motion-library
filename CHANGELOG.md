@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 012 — Actual-size preview in a separate tab (2026-10-22)
+- 「表示サイズ」に「実寸プレビュー」ボタンを追加。設定・配色を別タブへ引き継ぐ。
+- `preview.html` は固定レンダラー `embed/v1/index.html` をiframeで使用し、WordPressと同じ「幅100%または上限px」「高さclamp(320px,70vh,設定上限)」を再現。
+- プレビュー画面で実際のCSS pxを計測して表示。文字の表示切替と「設定した最大高さで確認」を追加。
+- 最大高さの直接表示モードはWordPressの標準埋め込みとは異なるため、画面内で明確に区別。
+- 編集画面の従来プレビュー・WordPress出力・描画シェーダーは変更せず。GitHub Pagesでの実描画検証は要確認。
+
 ## 011 — Default maximum width 100% (2026-10-22)
 - 最大幅は標準で100%。必要なときだけpx指定に切り替えられるUIへ変更。
 - WordPress出力HTMLのmax-widthも標準で100%。PC/スマホのレスポンシブ動作を維持。
