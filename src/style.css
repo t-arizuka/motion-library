@@ -105,3 +105,9 @@ body[data-page="editor"] .footer{padding-block:16px}
 .source-privacy{font-size:11px;line-height:1.7;color:#677686;margin:0}
 .source-privacy.is-personal-host{color:#86532f;background:#fff7f0;border:1px solid #f4dcc8;border-radius:7px;padding:9px 11px}
 @media(max-width:350px){.display-size-fields{grid-template-columns:1fr}}
+
+/* 011: Maximum width defaults to 100%, with optional pixel override. */
+.size-mode-select{min-width:0;width:100%;height:39px;padding:0 8px;border:1px solid #dfe4e8;border-radius:8px;background:#fff;color:#28384b;font-size:11px}
+.size-mode-select:focus-visible{outline:2px solid #536c80;outline-offset:1px}
+.display-size-fields .unit-input[hidden]{display:none!important}
+#fixed-width-control{margin-top:6px}
