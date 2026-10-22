@@ -39,7 +39,7 @@ See ./LICENSE-RADIANT.txt. Original shader aesthetics and palettes are intention
 
   var _pad = parseFloat(new URLSearchParams(location.search).get('p')) || 1;
 
-  var gl = canvas.getContext('webgl', { alpha: true, antialias: false, preserveDrawingBuffer: false });
+  var gl = canvas.getContext('webgl', { alpha: true, antialias: false, preserveDrawingBuffer: true });
   if (!gl) return;
 
   var vertSrc = [
