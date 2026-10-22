@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 010 — Delivery URL clarity and sizing (2026-10-22)
+- WordPressコードには公開URLが含まれることを明示し、GitHub Pages個人アカウントURLは社内テスト向けと注意を追加。
+- 納品用は独自ドメイン等へ変更可能（単にURL文字列を隠す処理は行わない）。
+- 最大幅/高さ（px）を簡易編集。WordPress HTML、プレビュー、重ね表示テスト、保存/復元に反映。
+- Paper Shadersの固定レンダラー・既存配色プリセットは変更なし。実WordPress表示は未検証。
+
 ## 009 — Collapsed color presets (2026-10-21)
 - Mesh GradientとGrain Gradientの編集画面に、各5色セットのカラープリセットを追加。
 - 初期表示ではプリセット欄を閉じ、開いたときだけ一覧表示。
