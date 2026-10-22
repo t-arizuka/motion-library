@@ -1,129 +1,244 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Silk Material Study 001 — Motion Library</title>
+<title>Silk Cascade / Silk Groove — Motion Library</title>
+<link rel="stylesheet" href="../../src/style.css">
 <style>
-:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:#1f2a37;background:#f6f7f8;font-synthesis:none;-webkit-font-smoothing:antialiased}
-*{box-sizing:border-box}body{margin:0}button,a{font:inherit}button{cursor:pointer}
-header{max-width:1390px;padding:26px clamp(18px,4vw,48px) 20px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{font-size:13px;font-weight:800;letter-spacing:.075em;text-decoration:none;color:#1e2937}
-.back{font-size:11px;text-decoration:none;color:#647386;border:1px solid #dce1e7;border-radius:100px;padding:9px 14px;white-space:nowrap}
-main{max-width:1390px;margin:auto;padding:0 clamp(18px,4vw,48px) 70px}
-.eyebrow{color:#8591a0;font:700 10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.13em;text-transform:uppercase}
-.headline{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin:22px 0 22px}
-h1{font-size:clamp(25px,4vw,45px);font-weight:650;letter-spacing:-.065em;line-height:1.15;margin:8px 0 8px}
-.intro{color:#6d7b88;line-height:1.85;font-size:12px;margin:0;max-width:650px}
-.phase{border:1px solid #d8e0e4;border-radius:99px;padding:8px 13px;background:#fff;color:#627586;font-size:10px;white-space:nowrap}
-.controls{border:1px solid #e4e8eb;background:#fff;border-radius:12px;padding:13px;display:flex;align-items:center;gap:17px;flex-wrap:wrap;margin-bottom:14px}
-.segment{display:inline-flex;align-items:center;gap:4px;background:#f3f5f7;border-radius:9px;padding:4px}
-.segment button{background:transparent;border:0;border-radius:6px;padding:8px 12px;color:#708091;font-size:11px;min-height:34px;font-weight:600;white-space:nowrap}
-.segment button[aria-pressed="true"]{background:white;color:#26384b;box-shadow:0 1px 5px #24384914}
-.cgroup{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.cgroup>span{color:#94a0ab;font-size:10px}
-.preview-shell{padding:clamp(10px,2vw,20px);border:1px solid #e2e6eb;border-radius:14px;background:#e9edf0}
-.preview-stage{position:relative;isolation:isolate;width:100%;height:auto;aspect-ratio:16/9;max-width:100%;overflow:hidden;margin-inline:auto;background:linear-gradient(140deg,#211a25,#403148,#3d2b30);box-shadow:0 11px 35px #29334220;transition:max-width .2s}
-.preview-stage.phone{width:min(390px,100%);aspect-ratio:390/844}
-.preview-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;pointer-events:none}
-.shade{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(0,0,0,.26),transparent 68%);pointer-events:none}
-.copy{position:absolute;z-index:3;inset:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(22px,7vw,116px);pointer-events:none;text-shadow:0 2px 20px #090b1250;color:white}
-.copy.dark{color:#19202c;text-shadow:0 1px 13px #ffffff66}
-.copy[hidden],.shade[hidden]{display:none}
-.copy .tag{font-size:clamp(9px,1vw,12px);font-weight:600;letter-spacing:.18em;margin:0 0 14px}
-.copy h2{font-weight:620;letter-spacing:-.06em;font-size:clamp(30px,4vw,76px);line-height:1.27;margin:0 0 22px}
-.copy p{font-size:clamp(12px,1.05vw,17px);line-height:1.8;margin:0}
-.preview-stage.phone .copy{padding:30px}
-.preview-stage.phone .copy h2{font-size:34px}
-.preview-stage.phone .copy p{font-size:12px}
-.status-strip{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:14px 0 0;color:#7c8894;font-size:11px;line-height:1.65}
-.status-strip strong{font-weight:700;color:#53687b}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
-.panel{padding:24px;background:white;border:1px solid #e4e8ec;border-radius:12px}
-.panel h3{font-size:14px;margin:0 0 12px;font-weight:700;letter-spacing:-.02em}
-.panel p,.panel li{font-size:11px;line-height:1.9;color:#70808d}
-.panel ul{padding-left:19px;margin:8px 0 0}
-.panel a{color:#435c73}
-.panel strong{color:#3a4c5e}
-.caveat{margin-top:22px;color:#98a3ad;font-size:10px;line-height:1.9}
-button:focus-visible,a:focus-visible{outline:2px solid #45677a;outline-offset:3px}
-@media(max-width:850px){.info-grid{grid-template-columns:1fr}.panel{padding:20px}}
-@media(max-width:600px){header{padding-block:20px 12px}.headline{margin-top:10px}.controls{gap:10px;padding:11px}.cgroup{gap:4px}.segment button{padding:7px 9px}.copy h2{font-size:30px}.copy{padding:18px}.copy p{font-size:11px}.preview-stage.phone .copy h2{font-size:29px}}
-@media(prefers-reduced-motion:reduce){.preview-stage{transition:none}}
+/* The shared editor stylesheet above is the source of truth for the
+   header, split layout, typography, toolbar and panel controls. */
+.study-frame{position:absolute;inset:0;z-index:1;width:100%;height:100%;border:0;display:block;pointer-events:none;background:#1e1723}
+.study-hero{background:linear-gradient(135deg,#19111f,#503046 48%,#5c4753)}
+.study-hero .hero-copy{z-index:5}
+.study-hero.copy-dark .hero-copy{color:#222935;text-shadow:0 1px 16px #fffc}
+.study-hero.copy-dark .text-vignette,.study-hero.hide-copy .text-vignette{display:none}
+.study-hero.copy-dark .hero-watermark{color:#1b253999}
+.study-hero.hide-copy .hero-watermark{display:none}
+.study-hero .hero-watermark{right:18px;bottom:16px}
+.study-view-buttons{display:grid;gap:9px}
+.study-view-choice{position:relative;cursor:pointer;display:flex;gap:12px;align-items:flex-start;padding:15px 14px;border:1px solid #e0e5e9;border-radius:9px;background:#fff;transition:background .15s,border-color .15s}
+.study-view-choice:hover{border-color:#adbcc8}
+.study-view-choice:has(input:checked){border-color:#526b7c;background:#f5f8fa;box-shadow:inset 0 0 0 1px #526b7c}
+.study-view-choice input{accent-color:#304b61;margin:3px 0 0;flex:0 0 auto}
+.study-view-choice span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.study-view-choice strong{font-size:12px;font-weight:650;color:#34485a}
+.study-view-choice small{font-size:10px;color:#95a0aa;line-height:1.7}
+.study-tiny{font-size:11px;color:#91a0aa;line-height:1.8;margin:0}
+.study-text-colors{display:flex;gap:7px;flex-wrap:wrap}
+.study-text-colors button{flex:1;min-height:35px;padding:7px 12px;border-radius:7px;border:1px solid #e3e8ec;background:#fff;color:#718091;font-size:11px}
+.study-text-colors button[aria-pressed="true"]{color:#283d4d;border-color:#71899b;background:#f5f8fa;font-weight:650}
+.study-panel-title h2{font-size:23px}
+.study-caption{display:flex;align-items:center;gap:8px;font-size:11px;color:#7b8c9b;line-height:1.65}
+.study-caption::before{content:"";width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#8caaaf}
+.study-caption::after{content:"品質検証中";white-space:nowrap}
+.study-hint{font-size:11px;color:#8a98a5;line-height:1.8;margin:-2px 0 0}
+.study-review-points{margin:0;padding-left:18px;font-size:11px;line-height:1.9;color:#677684}
+.study-review-points li+li{margin-top:4px}
+.study-state{margin:8px 0 0;color:#8695a2;font-size:10px;line-height:1.7}
+.study-state.is-error{color:#a46863}
+.study-footnote{font-size:10px;line-height:1.9;color:#919ca6;margin-top:9px}
+.study-footnote a{text-decoration:underline;text-underline-offset:2px}
+.study-panel .panel-actions{margin-top:2px}
+.study-small-status{white-space:normal;max-width:230px;text-align:center;line-height:1.45}
+.study-hero .surface-status{z-index:6}
+body.study-actual .editor-layout{display:block;min-height:0}
+body.study-actual .editor-panel{display:none}
+body.study-actual .preview-area{width:100%;max-width:none;padding:16px 0 28px}
+body.study-actual .preview-heading{padding-inline:clamp(18px,2.4vw,38px);margin-bottom:16px}
+body.study-actual .preview-backdrop{height:clamp(320px,70vh,760px);padding:0;min-height:0;border:0;border-radius:0;background:transparent}
+body.study-actual .hero{box-shadow:none;border-radius:0;transition:none}
+body.study-actual .preview-help{padding-inline:clamp(18px,2.4vw,38px)}
+body.study-actual .hero.mobile{width:min(390px,100%);height:100%}
+body.study-actual .preview-backdrop:has(.hero.mobile){height:844px}
+body.study-actual .header-back::before{content:""}
+body.study-actual .footer{margin-top:auto}
+@media(max-width:780px){
+ .study-panel .panel-actions{padding-top:12px}
+ .study-hero .hero-copy p{line-height:1.7}
+}
+@media(max-width:650px){
+ .study-small-status{display:none}
+ body.study-actual .preview-heading{padding-inline:16px}
+}
+@media(max-width:430px){
+ .study-hero .hero-copy{top:32%}
+ .study-hero.mobile .hero-copy{top:36%}
+ .study-hero .hero-copy h2{font-size:27px}
+ .study-text-colors button{min-width:65px}
+ body.study-actual .hero.mobile{width:min(390px,100%)}
+}
+@media(prefers-reduced-motion:reduce){.study-view-choice{transition:none}}
 </style>
 </head>
-<body>
-<header><a class="brand" href="../../index.html">MOTION LIBRARY <span class="eyebrow">/ VISUAL STUDY</span></a><a class="back" href="../../index.html">ギャラリーへ戻る ↗</a></header>
-<main>
-  <div class="headline"><div><span class="eyebrow">MATERIAL RESEARCH 001 · STATIC WEBGL</span><h1>Silk Material Study</h1><p class="intro">シルクの光沢、折り重なる陰影、余白。アニメーション実装前に、実際のWebGL描画を静止させてMVとしての品質を確認します。</p></div><span class="phase">静止ビジュアル検証 · 未承認</span></div>
-  <div class="controls">
-    <div class="cgroup"><span>作品</span><div class="segment" role="group" aria-label="比較作品"><button type="button" data-shader="cascade" aria-pressed="true">Silk Cascade</button><button type="button" data-shader="groove" aria-pressed="false">Silk Groove</button></div></div>
-    <div class="cgroup"><span>表示</span><div class="segment" role="group" aria-label="画面サイズ"><button type="button" data-device="desktop" aria-pressed="true">PC</button><button type="button" data-device="mobile" aria-pressed="false">スマホ</button></div></div>
-    <div class="cgroup"><span>文字</span><div class="segment" role="group" aria-label="文字色"><button type="button" data-copy="white" aria-pressed="true">白</button><button type="button" data-copy="dark" aria-pressed="false">黒</button><button type="button" data-copy="none" aria-pressed="false">なし</button></div></div>
-  </div>
-  <div class="preview-shell"><div class="preview-stage" id="stage">
-    <iframe id="shader-frame" src="silk-cascade-static.html" title="Silk Cascade 静止WebGLプレビュー" loading="eager" aria-hidden="true" tabindex="-1"></iframe>
-    <div class="shade" id="shade"></div>
-    <div class="copy" id="copy"><div class="tag">BRAND MESSAGE / 2026</div><h2>新しい未来を、<br>ここから。</h2><p>可能性は、いつも創造の先にある。</p></div>
-  </div></div>
-  <div class="status-strip"><span><strong id="active-name">Silk Cascade</strong> — 原作の配色と陰影。時間を固定した静止WebGL描画。</span><span id="gpu-status" role="status" aria-live="polite">WebGL読み込み中…</span></div>
-  <div class="info-grid">
-    <section class="panel"><h3>評価してほしいこと</h3><ul>
-      <li>静止画だけでも、布らしい素材の説得力があるか</li>
-      <li>左側に文字を配置しても、背景の主張が強すぎないか</li>
-      <li>PCとスマホで構図が破綻しないか</li>
-      <li>白文字・黒文字のどちらが読みやすいか</li>
-      <li>CascadeとGrooveのどちらをMotion Libraryへ採用したいか</li>
-    </ul></section>
-    <section class="panel"><h3>今回の検証範囲</h3>
-      <p><strong>実際のWebGLシェーダー</strong>を使用。Radiantの公開ソースをMITライセンスの条件に従い静止化しました。色・形状・照明計算は原作から変更していません。</p>
-      <p>今回は<strong>色編集・速度設定・WordPress書き出し機能は未実装</strong>です。静止画品質の承認後に着手します。</p>
-      <p>参照：<a href="https://radiant-shaders.com/shader/silk-cascade" target="_blank" rel="noopener noreferrer">Silk Cascade ↗</a> ／ <a href="https://radiant-shaders.com/shader/silk-groove" target="_blank" rel="noopener noreferrer">Silk Groove ↗</a></p>
+<body data-page="editor">
+<div class="shell">
+<header class="header">
+  <a class="wordmark" href="../../index.html" aria-label="Motion Library 一覧へ"><span class="mark"><b></b><b></b><b></b></span><span>motion<span>library</span></span></a>
+  <span class="header-label">VISUAL STUDY / STATIC WEBGL</span>
+  <a class="header-back" id="back-link" href="../../index.html">← 一覧へ戻る</a>
+</header>
+<main class="editor-layout">
+  <section class="preview-area" aria-labelledby="study-title">
+    <div class="preview-heading">
+      <div class="preview-identity">
+        <span class="eyebrow" id="study-kicker">STUDY / 01</span>
+        <h1 id="study-title">Silk Cascade</h1>
+      </div>
+      <div class="preview-toolbar" aria-label="プレビュー操作">
+        <div class="segments" role="group" aria-label="プレビューの画面比率">
+          <button type="button" data-device="desktop" class="active" aria-pressed="true">PC</button>
+          <button type="button" data-device="mobile" aria-pressed="false">スマホ</button>
+        </div>
+        <div class="preview-tool-right">
+          <label class="inline-check"><input id="show-text" type="checkbox" checked> 文字を表示</label>
+        </div>
+        <span class="render-state study-small-status" id="gpu-status" aria-live="polite">描画を確認中</span>
+      </div>
+    </div>
+    <div class="preview-backdrop">
+      <div class="hero preview-surface study-hero" id="study-hero">
+        <iframe class="study-frame" id="study-frame" src="silk-cascade-static.html" loading="eager" title="Silk Cascade 静止WebGL"></iframe>
+        <div class="text-vignette"></div>
+        <span class="surface-status" id="shader-loading">WebGLシェーダーを確認中…</span>
+        <div class="hero-copy">
+          <span>BRAND MESSAGE / 2026</span>
+          <h2>新しい未来を、<br>ここから。</h2>
+          <p>可能性は、いつも創造の先にある。</p>
+        </div>
+        <span class="hero-watermark">SILK MATERIAL / STUDY</span>
+      </div>
+    </div>
+    <div class="preview-help"><span>静止状態のシルクの質感を確認するための検証版です。</span><span>原作の配色・照明は変更していません。</span></div>
+  </section>
+  <aside class="editor-panel study-panel" aria-label="品質比較の設定">
+    <div class="panel-title study-panel-title">
+      <div><div class="eyebrow">COMPARE / QUALITY GATE</div><h2>ビジュアル検証</h2></div>
+      <button type="button" class="reset-link" id="reset-study">初期化</button>
+    </div>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">01</span><h3>比較する作品</h3></div>
+      <div class="study-view-buttons" role="radiogroup" aria-label="比較作品">
+        <label class="study-view-choice"><input type="radio" name="silk-variant" value="cascade" checked><span><strong>Silk Cascade</strong><small>半透明の重なり・奥行きのあるシルク</small></span></label>
+        <label class="study-view-choice"><input type="radio" name="silk-variant" value="groove"><span><strong>Silk Groove</strong><small>立体的なひだ・連続した光沢</small></span></label>
+      </div>
     </section>
-  </div>
-  <p class="caveat">© 2025 Paul Bakaus · Radiant / MIT License（同梱: LICENSE-RADIANT.txt）。このページはMotion Library内部の検証プロトタイプです。合格作品のみ後日正式収録します。</p>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">02</span><h3>文字の見え方</h3></div>
+      <div class="study-text-colors" role="group" aria-label="文字色を選択">
+        <button type="button" data-copy="white" aria-pressed="true">白文字</button>
+        <button type="button" data-copy="dark" aria-pressed="false">黒文字</button>
+      </div>
+      <p class="study-hint" style="margin-top:11px">上部の「文字を表示」で文字なしの構図も確認できます。</p>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">03</span><h3>品質チェック</h3></div>
+      <ul class="study-review-points">
+        <li>布らしい光沢・陰影・奥行きがあるか</li>
+        <li>キャッチコピーが読みやすいか</li>
+        <li>PC・スマホともに構図が成立するか</li>
+      </ul>
+    </section>
+    <details class="advanced">
+      <summary>検証について <span>必要な場合だけ</span></summary>
+      <p class="study-footnote">RadiantのMITライセンス作品を原作の質感・配色のまま静止化しました。アニメーション、色・速度の編集、WordPress用HTMLの書き出しは、静止画の品質承認後に実装します。</p>
+      <p class="study-footnote"><a href="https://radiant-shaders.com/shader/silk-cascade" target="_blank" rel="noopener noreferrer">Silk Cascade 公式 ↗</a> ／ <a href="https://radiant-shaders.com/shader/silk-groove" target="_blank" rel="noopener noreferrer">Silk Groove 公式 ↗</a></p>
+    </details>
+    <div class="panel-actions">
+      <button type="button" id="open-large-preview" class="button-primary">大きく確認する <span aria-hidden="true">↗</span></button>
+      <p>品質検証中のため、ギャラリー掲載・WordPress用コード生成はまだ利用できません。</p>
+      <p class="study-state" id="study-state" aria-live="polite">静止ビジュアルの品質承認待ちです。</p>
+    </div>
+  </aside>
 </main>
+<footer class="footer"><span>Motion Library — Silk Material Study 001 / Quality Gate</span><span>Radiant / MIT · © 2025 Paul Bakaus</span></footer>
+</div>
 <script>
-(()=>{
-'use strict';
-const state={shader:'cascade',device:'desktop',copy:'white'};
-const frame=document.getElementById('shader-frame');
-const stage=document.getElementById('stage');
-const label=document.getElementById('active-name');
-const gpu=document.getElementById('gpu-status');
-const copy=document.getElementById('copy');
-const shade=document.getElementById('shade');
-let checkTimer=0;
-const shaders={cascade:{name:'Silk Cascade',source:'silk-cascade-static.html'},groove:{name:'Silk Groove',source:'silk-groove-static.html'}};
-function updateGroup(key,attr){
-  document.querySelectorAll('[data-'+attr+']').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset[attr]===state[key])));
-}
-function checkReady(){
-  clearTimeout(checkTimer);
-  checkTimer=setTimeout(()=>{
-    let ready=false;
-    try{ready=frame.contentDocument?.documentElement?.dataset?.studyReady==='true';}catch(e){}
-    gpu.textContent=ready?'実WebGL描画を確認できました':'WebGL描画を確認できません。ChromeのGPU設定をご確認ください。';
-  },900);
-}
-frame.addEventListener('load',checkReady);
-function draw(){
- updateGroup('shader','shader');updateGroup('device','device');updateGroup('copy','copy');
- stage.classList.toggle('phone',state.device==='mobile');
- copy.hidden=state.copy==='none';copy.classList.toggle('dark',state.copy==='dark');
- shade.hidden=state.copy!=='white';
- label.textContent=shaders[state.shader].name;
- const source=shaders[state.shader].source;
- if(frame.getAttribute('src')!==source){
-   frame.title=shaders[state.shader].name+' 静止WebGLプレビュー';
-   frame.src=source;gpu.textContent='WebGL読み込み中…';
- }
-}
-for(const key of ['shader','device','copy']){
- document.querySelectorAll('[data-'+key+']').forEach(btn=>btn.addEventListener('click',()=>{state[key]=btn.dataset[key];draw();}));
-}
-draw();checkReady();
+(() => {
+  'use strict';
+  const params = new URLSearchParams(location.search);
+  const types = {
+    cascade:{title:'Silk Cascade',src:'silk-cascade-static.html',number:'01'},
+    groove:{title:'Silk Groove',src:'silk-groove-static.html',number:'02'}
+  };
+  const state = {
+    shader:params.get('shader')==='groove'?'groove':'cascade',
+    device:params.get('device')==='mobile'?'mobile':'desktop',
+    text:params.get('text')!=='0',
+    color:params.get('color')==='dark'?'dark':'white'
+  };
+  const actual=params.get('view')==='actual';
+  const $=id=>document.getElementById(id);
+  const hero=$('study-hero'),frame=$('study-frame'),gpu=$('gpu-status'),loading=$('shader-loading');
+  let pollTimer=0, pollCount=0, requestSeq=0;
+  const getReady=()=>{try{return frame.contentDocument?.documentElement?.dataset?.studyReady==='true'}catch(e){return false}};
+  function watchFrame(){
+    clearTimeout(pollTimer);pollCount=0;const seq=++requestSeq;
+    loading.hidden=false;gpu.textContent='描画を確認中';gpu.classList.remove('ready','error');
+    function poll(){
+      if(seq!==requestSeq)return;
+      if(getReady()){
+        loading.hidden=true;
+        gpu.textContent='WebGL 描画完了';gpu.classList.add('ready');
+        $('study-state').textContent='実WebGLの静止フレームを読み込みました。品質の合格判定はまだです。';
+        return;
+      }
+      if(++pollCount<28){pollTimer=setTimeout(poll,150);return}
+      loading.textContent='WebGL描画を確認できません。ブラウザのGPU設定をご確認ください。';
+      gpu.textContent='描画未確認';gpu.classList.add('error');
+      $('study-state').textContent='このブラウザではWebGLの描画完了を確認できませんでした。';
+    }
+    pollTimer=setTimeout(poll,150);
+  }
+  frame.addEventListener('load',watchFrame);
+  function render(){
+    $('study-title').textContent=types[state.shader].title;
+    $('study-kicker').textContent='STUDY / '+types[state.shader].number;
+    const src=types[state.shader].src;
+    if(frame.getAttribute('src')!==src){
+      frame.title=types[state.shader].title+' 静止WebGL';
+      frame.setAttribute('src',src);
+      watchFrame();
+    }
+    hero.classList.toggle('mobile',state.device==='mobile');
+    hero.classList.toggle('hide-copy',!state.text);
+    hero.classList.toggle('copy-dark',state.color==='dark');
+    $('show-text').checked=state.text;
+    document.querySelectorAll('[data-device]').forEach(btn=>{
+      const on=btn.dataset.device===state.device;
+      btn.classList.toggle('active',on);
+      btn.setAttribute('aria-pressed',String(on));
+    });
+    document.querySelectorAll('[data-copy]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.copy===state.color)));
+    document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.checked=el.value===state.shader);
+  }
+  document.querySelectorAll('[data-device]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.device=btn.dataset.device;render();
+  }));
+  document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',()=>{
+    state.color=btn.dataset.copy;render();
+  }));
+  document.querySelectorAll('input[name="silk-variant"]').forEach(el=>el.addEventListener('change',()=>{
+    if(el.checked){state.shader=el.value;render();}
+  }));
+  $('show-text').addEventListener('change',e=>{state.text=e.target.checked;render()});
+  $('reset-study').addEventListener('click',()=>{
+    state.shader='cascade';state.device='desktop';state.text=true;state.color='white';render();
+  });
+  $('open-large-preview').addEventListener('click',()=>{
+    const u=new URL(location.href);u.searchParams.set('view','actual');u.searchParams.set('shader',state.shader);
+    u.searchParams.set('device',state.device);u.searchParams.set('text',state.text?'1':'0');u.searchParams.set('color',state.color);
+    window.open(u.href,'_blank','noopener');
+  });
+  if(actual){
+    document.body.classList.add('study-actual');
+    $('back-link').href='./index.html';
+    $('back-link').textContent='← 比較画面へ戻る';
+  }
+  render();watchFrame();
+  window.addEventListener('pagehide',()=>clearTimeout(pollTimer));
 })();
 </script>
-</body></html>
+</body>
+</html>
