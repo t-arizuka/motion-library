@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- Motion Library Silk Cascade renderer v1. Version-pinned. Upstream Radiant MIT license: ./LICENSE-RADIANT.txt -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Motion Library — Silk Cascade (v1)</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0e0813}
+#stage{position:relative;width:100%;height:100%;overflow:hidden}
+#shader{display:block;width:100%;height:100%;border:0;pointer-events:none;opacity:0;transition:opacity .18s}
+@media(prefers-reduced-motion:reduce){#shader{transition:none}}
+</style>
+</head>
+<body>
+<div id="stage" aria-hidden="true"><iframe id="shader" title="Silk Cascade background" tabindex="-1" loading="eager" scrolling="no" src="./shader.html"></iframe></div>
+<script>
+(()=>{
+'use strict';
+const ranges={sheen:[.3,2],layerOpacity:[.55,1.35],speed:[.1,1.5],sway:[0,1],smoothness:[0,1]};
+const colors=['col1','col2','col3','background'];
+const defaults={
+  colors:{col1:'#806126',col2:'#6B2E38',col3:'#4D3873',background:'#0E0813'},
+  material:{sheen:1,layerOpacity:1},
+  motion:{speed:.4,sway:.35,smoothness:0}
+};
+function validate(input){
+  if(!input||typeof input!=='object'||Array.isArray(input))throw Error('設定が不正です');
+  if(input.schemaVersion!==1||input.template!=='silk-cascade')throw Error('未対応のシルク設定です');
+  const raw=input.settings;
+  if(!raw||typeof raw!=='object'||!raw.colors||!raw.material||!raw.motion)throw Error('設定データが不足しています');
+  const out={colors:{},material:{},motion:{}};
+  for(const key of colors){
+    const v=raw.colors[key];
+    if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))throw Error('色が不正です: '+key);
+    out.colors[key]=v.toUpperCase();
+  }
+  for(const [group,keys] of [['material',['sheen','layerOpacity']],['motion',['speed','sway','smoothness']]]){
+    for(const key of keys){
+      const v=raw[group][key],range=ranges[key];
+      if(typeof v!=='number'||!Number.isFinite(v)||v<range[0]||v>range[1])throw Error('数値が不正です: '+key);
+      out[group][key]=v;
+    }
+  }
+  return out;
+}
+function parseConfig(){
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('preview')==='1'&&!qs.has('data'))return {settings:defaults,preview:true};
+  const data=qs.get('data');
+  if(!data||data.length>5000||!/^[a-zA-Z0-9_-]+$/.test(data))throw Error('設定URLが不正です');
+  let decoded;
+  try{decoded=atob(data.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-data.length%4)%4));}
+  catch(e){throw Error('設定データを読み込めません');}
+  return {settings:validate(JSON.parse(decoded)),preview:false};
+}
+const stage=document.getElementById('stage'),frame=document.getElementById('shader');
+let cfg;try{cfg=parseConfig();}catch(e){
+  stage.dataset.status='error';console.error('[Silk Cascade renderer]',e);frame.remove();return;
+}
+stage.style.background=cfg.settings.colors.background;
+const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+const settings=cfg.settings;
+function apply(){
+  if(!frame.contentWindow)return;
+  frame.contentWindow.postMessage({
+    type:'motion-silk-study-settings',
+    colors:settings.colors,
+    sheen:settings.material.sheen,
+    layerOpacity:settings.material.layerOpacity,
+    speed:settings.motion.speed,
+    sway:settings.motion.sway,
+    smoothness:settings.motion.smoothness,
+    playing:!reduced&&!cfg.preview
+  },location.origin);
+}
+let pollId=0;
+function check(){
+  try{
+    if(frame.contentDocument?.documentElement?.dataset?.studyReady==='true'){
+      frame.style.opacity='1';stage.dataset.status='ready';return;
+    }
+  }catch(e){}
+  pollId=window.setTimeout(check,150);
+}
+frame.addEventListener('load',()=>{apply();check();});
+window.addEventListener('pagehide',()=>clearTimeout(pollId),{once:true});
+})();
+</script>
+</body></html>
