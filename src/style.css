@@ -118,3 +118,51 @@ body[data-page="editor"] .footer{padding-block:16px}
 .actual-preview-button:focus-visible{outline:2px solid #456980;outline-offset:2px}
 .actual-preview-button span{font-size:14px;font-weight:400}
 @media(prefers-reduced-motion:reduce){.actual-preview-button{transition:none}}
+
+/* 013: Simplified WordPress export (code is collapsed until needed). */
+.export-dialog-v2{width:min(620px,calc(100vw - 24px));max-height:min(92dvh,840px);overflow-y:auto;padding:clamp(18px,2.3vw,27px)}
+.export-dialog-v2 .embed-dialog-head h2{margin:6px 0 0;font-size:24px}
+.export-subheading{font-size:11px;line-height:1.7;color:#798695;margin:12px 0 0;max-width:475px}
+.export-dialog-v2 .embed-dialog-head{align-items:start;gap:12px}
+.export-section{margin-top:22px}
+.export-section-title{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.export-section-title h3{font-size:13px;margin:0;font-weight:700;letter-spacing:-.015em}
+.export-section-title label{cursor:pointer}
+.export-step{font-size:10px;letter-spacing:.08em;color:#9aa6b4;font-weight:800}
+.export-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.export-choice{cursor:pointer;display:flex;align-items:flex-start;gap:11px;border:1px solid #e0e5ea;border-radius:10px;padding:15px 13px 13px;min-width:0;min-height:81px;transition:background .15s,border-color .15s}
+.export-choice:hover{border-color:#b9c8d5}
+.export-choice:has(input:checked){border-color:#354d63;background:#f5f8fa;box-shadow:0 0 0 1px #354d63}
+.export-choice:focus-within{outline:2px solid #70869a;outline-offset:1px}
+.export-choice input{accent-color:#344b61;margin:3px 0 0;flex:0 0 auto}
+.export-choice span{display:flex;flex-direction:column;gap:6px}
+.export-choice strong{font-size:12px;color:#27384b}
+.export-choice small{font-size:10px;line-height:1.6;color:#8a95a2}
+.export-host-section{margin-top:19px}
+.export-host-section>input{display:block;width:100%;min-width:0;padding:11px 12px;border:1px solid #d8e0e8;border-radius:8px;color:#36485a;font:12px ui-monospace,Consolas,monospace;box-sizing:border-box}
+.export-host-section .source-privacy{margin:8px 0 0;font-size:10px;line-height:1.6}
+.export-host-section .source-privacy.is-personal-host{padding:10px 11px;font-size:10px}
+.export-output-summary{border-top:1px solid #edf0f2;border-bottom:1px solid #edf0f2;margin-top:19px;padding:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.export-output-summary>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.export-output-summary span{font-size:10px;color:#95a0aa}
+.export-output-summary strong{font-size:12px;font-weight:650;color:#34485b;overflow-wrap:anywhere}
+.export-dialog-v2 .export-warning{min-height:0;margin:13px 0 0;font-size:10px;line-height:1.65;color:#6f8292}
+.export-dialog-v2 .embed-dialog-actions{margin:15px 0 0;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:9px}
+.export-dialog-v2 .embed-dialog-actions .button-primary{min-width:0;justify-content:space-between;padding:13px 14px}
+.export-dialog-v2 .embed-dialog-actions .button-muted{min-width:0;padding:13px 10px}
+.export-code-details{margin-top:19px;padding-top:16px;border-top:1px solid #edf0f2}
+.export-code-details>summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;color:#657788;font-size:11px;font-weight:650}
+.export-code-details>summary::-webkit-details-marker{display:none}
+.export-code-details>summary:before{content:'＋';font-size:14px;color:#8c9ba6}
+.export-code-details[open]>summary:before{content:'−'}
+.export-code-details>summary span{margin-left:auto;font-weight:400;color:#a0aab4;font-size:10px}
+.export-dialog-v2 #embed-code{width:100%;height:135px;min-height:90px;margin-top:12px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;overflow-x:hidden;padding:12px;font:11px/1.7 ui-monospace,Consolas,monospace;color:#46586c;background:#f9fafb;border:1px solid #e1e6ec;border-radius:8px}
+.export-dialog-v2 .embed-caveat{font-size:10px;margin-top:15px;line-height:1.7}
+@media(max-width:540px){
+  .export-dialog-v2{padding:20px 16px}
+  .export-choice-grid{grid-template-columns:1fr}
+  .export-choice{min-height:0;padding:12px}
+  .export-dialog-v2 .embed-dialog-actions{grid-template-columns:1fr}
+  .export-dialog-v2 .embed-dialog-actions .button-muted{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.export-choice{transition:none}}
