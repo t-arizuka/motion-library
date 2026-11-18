@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Light Rays Study 001 — 実WebGL静止試作（2026-11-18）
+- 新規4カテゴリ候補として「Light Rays」の独立した静止WebGL試作を追加（正式ギャラリーには未収録）。
+- `studies/light-rays-001/` に自作GLSL・WebGL1レンダラー・共通UIを使う品質検証ページ・READMEを追加。
+- 右上からの白青い光、深いネイビー、左の文字余白、下部の淡い光だまりを再現する方向。Bloomなし。
+- Mesa llvmpipe のオフスクリーンOpenGL ESでGLSLのコンパイルとPC/スマホ相当の実描画に成功（GLエラー0）。
+- ブラウザ実GPUでの画質判定とユーザー承認は未実施。アニメーション・GUI・WordPress出力は行わない。
+- 既存3作品のエディタ、GitHub Pagesギャラリー、WPレンダラーは変更なし。Vercel移行も未実施。
+
 ## Optical Glass Study 001 — 不合格・開発停止（2026-11-18）
 - ユーザーの実WebGLスクリーンショットをもとに品質不合格と判定。
 - 透明・屈折・光学反射が弱く、青いプラスチック状の帯に見える。形状と構図も不自然。
