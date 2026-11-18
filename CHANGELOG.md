@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 015 — Background-only WordPress export (2026-11-18)
+- ユーザーがWordPress上の実際の背景反映を確認（詳細な保存・再編集・機種別テストは未確認）。
+- Mesh / Grain / Silkの出力ダイアログからMVセット/背景のみの選択を削除し、背景iframeだけのHTMLを生成するよう変更。
+- 配信元URLを確認用リンクで常時表示し、編集欄のみ折りたたみへ。コードは初期状態から常時表示し、手動選択・コピー可能。
+- 実寸テストは背景のみ、既存GUI・シェーダー・WordPressレンダラーは不変更。
+- 独自ドメインの契約や配信先の変更は行っていない。GitHub Pagesで開発継続。
+
 ## 014 — Silk Cascade approved / added to collection and WordPress export (2026-10-22)
 - Silk Cascadeの色変更・静止品質・アニメーション品質がユーザー確認で合格。正式ライブラリ3作品目として`index.html`へ追加。
 - `silk.html` 正式エディタを新規作成。共通CSS、色・素材・速度、実寸、幅100%／高さ760pxを標準とするサイズ編集、JSON保存・読込、WordPress用HTMLのMVセット／背景のみを実装。
