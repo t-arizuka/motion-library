@@ -187,6 +187,14 @@ body[data-page="editor"] .footer{padding-block:16px}
 .export-code-heading small{font-size:10px;font-weight:400;color:#99a5af}
 .export-dialog-v2 .export-code-visible #embed-code{display:block;width:100%;height:144px;min-height:100px;box-sizing:border-box;margin-top:12px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;overflow-x:hidden;padding:12px;font:11px/1.7 ui-monospace,Consolas,monospace;color:#46586c;background:#f9fafb;border:1px solid #e1e6ec;border-radius:8px}
 .export-dialog-v2 .export-output-summary{margin-top:17px}
+/* 016 — Focused WordPress export: HTML and copy only. */
+.export-dialog-v2{width:min(620px,calc(100vw - 24px))}
+.export-dialog-v2 .export-code-visible{margin-top:20px;padding-top:0;border-top:0}
+.export-dialog-v2 .export-code-visible #embed-code{height:210px;min-height:140px;max-height:55vh}
+.export-dialog-v2 .export-warning{margin:10px 0 0;min-height:0}
+.export-dialog-v2 .embed-dialog-actions{display:block;margin:17px 0 0}
+.export-dialog-v2 .embed-dialog-actions .button-primary{display:flex;width:100%;justify-content:space-between}
+.export-dialog-v2 .embed-caveat{margin-top:15px}
 </style><script type="module">/** Visual engines are referenced, not vendored; see LICENSE_NOTES.md. */
 const  ENGINE_URL='https://esm.sh/@paper-design/shaders@0.0.78?bundle';
 const  TEMPLATES={
@@ -512,30 +520,17 @@ Object.defineProperty(window,'motionLibraryState',{get(){return {page:PAGE,templ
 <details class="advanced"><summary>細かい調整 <span>必要な場合だけ</span></summary><div id="advanced-settings"></div></details>
 <div class="panel-actions"><button type="button" id="export-wp" class="button-primary">WordPress用HTMLを取得 <span aria-hidden="true">↗</span></button><div class="secondary-actions"><button type="button" id="save" class="button-muted">設定を保存</button><button type="button" id="load" class="button-muted">設定を読み込む</button></div><input hidden id="load-file" type="file" accept=".json,application/json"><p>編集した色と動きが埋め込み先へ反映されます。</p></div></aside></main>
 <footer class="footer"><span>Motion Library — Gallery / Editor 007</span></footer></div><dialog id="embed-dialog" class="embed-dialog export-dialog-v2" aria-labelledby="embed-heading">
-  <div class="embed-dialog-head"><div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">背景アニメーションのみを書き出します。クラシックエディタの「テキスト」タブに貼り付けてください。</p></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
-
-  <section class="export-source-overview" aria-label="配信元URLの確認">
-    <div class="export-section-title"><h3>配信元URL</h3><span class="export-source-caption">現在の設定</span></div>
-    <a id="publish-url-current" class="export-source-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="配信元の公開URLを開いて確認">公開URLを読み込み中…</a>
-    <p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p>
-    <details class="export-url-settings">
-      <summary>配信元URLを変更する</summary>
-      <label for="publish-url">移行時など、配信先を変更するときだけ編集してください</label>
-      <input id="publish-url" type="url" placeholder="https://your-project.example/" autocomplete="url" spellcheck="false" aria-describedby="source-privacy">
-    </details>
-  </section>
-  <div class="export-output-summary" aria-live="polite">
-    <div><span>背景</span><strong id="export-template-name">Mesh Gradient</strong></div>
-    <div><span>出力サイズ</span><strong id="export-dimensions">幅100% / 高さ最大760px</strong></div>
+  <div class="embed-dialog-head">
+    <div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">背景のみのHTMLコードです。WordPressの「テキスト」タブへ貼り付けてください。</p></div>
+    <button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button>
   </div>
+  <section class="export-code-visible" aria-labelledby="export-code-heading">
+    <div class="export-code-heading"><span id="export-code-heading">生成されたHTMLコード</span><small>このまま貼り付けできます</small></div>
+    <textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
+  </section>
   <p id="export-warning" class="export-warning" role="status" aria-live="polite"></p>
   <div class="embed-dialog-actions">
     <button type="button" id="copy-embed" class="button-primary">WordPress用HTMLをコピー <span aria-hidden="true">⧉</span></button>
-    <button type="button" id="download-test" class="button-muted">実寸プレビュー ↗</button>
   </div>
-  <section class="export-code-visible" aria-labelledby="export-code-heading">
-    <div class="export-code-heading"><span id="export-code-heading">生成されたHTMLコード</span><small>いつでも確認・選択できます</small></div>
-    <textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
-  </section>
-  <p class="embed-caveat">※ 公開HTTPS URL・iframeを許可するWordPress環境が必要です。既存テーマに重ねる場合は配置調整が必要です。</p>
+  <p class="embed-caveat">※ WordPressでiframeを許可する環境が必要です。背景以外の文字・ボタンは出力しません。</p>
 </dialog><div class="toast" id="toast" role="status" aria-live="polite"></div></body></html>
