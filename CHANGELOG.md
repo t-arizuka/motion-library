@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Optical Glass Study 001 — 不合格・開発停止（2026-11-18）
+- ユーザーの実WebGLスクリーンショットをもとに品質不合格と判定。
+- 透明・屈折・光学反射が弱く、青いプラスチック状の帯に見える。形状と構図も不自然。
+- 4番目の独立カテゴリとして採用せず、微修正による継続開発もしない。
+- 試作コードと検証資料は不合格記録として保存。既存3作品・ギャラリー・WordPressレンダラーは変更なし。
+- 今回の品質不足はThree.jsの限界ではなく、今回の実装方式と目視検証不足によるもの。
+
 ## Glass Study 001 — Real Three.js static visual prototype (2026-11-18)
 - 第4カテゴリ候補「Optical Glass」の静止WebGL試作ページを新規追加: studies/optical-glass-001/index.html
 - scene.jsで厚みのある3本の曲面リボン、MeshPhysicalMaterialの透過・屈折/IOR/減衰・PMREM studio環境反射を構築。Bloom未使用。
