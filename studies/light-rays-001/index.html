@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Light Rays — 静止WebGL品質検証 | Motion Library</title>
+<link rel="stylesheet" href="../../src/style.css">
+<style>
+/* Shared Motion Library header, editor split layout and controls. */
+.rays-shell .preview-backdrop{height:min(690px,56vw);min-height:380px;padding:15px;background:#e9ecef}
+.rays-stage{background:radial-gradient(ellipse at 78% 20%,#344e64,#12283c 62%,#061521);isolation:isolate}
+#rays-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:2;pointer-events:none}
+#rays-canvas[hidden]{display:none}
+.rays-stage .hero-copy{z-index:4;left:8%;top:30%;text-shadow:0 2px 22px #04112073}
+.rays-stage .hero-copy span{font-size:10px;font-weight:650;letter-spacing:.20em;color:#dee8f0}
+.rays-stage .hero-copy h2{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:450;font-size:clamp(31px,3.6vw,60px);line-height:1.55;letter-spacing:.03em;margin:22px 0 16px}
+.rays-stage .hero-copy p{font-size:clamp(10px,1vw,14px);line-height:1.8;color:#dce8ee;letter-spacing:.015em}
+.rays-stage .hero-watermark{color:#c8d4e390;font:9px ui-monospace,Consolas,monospace;letter-spacing:.12em;z-index:4}
+.rays-stage.mobile{width:min(290px,100%);height:100%}
+.rays-stage.mobile .hero-copy{left:9%;top:24%;right:8%}
+.rays-stage.mobile .hero-copy h2{font-size:28px;line-height:1.6}
+.rays-stage.mobile .hero-copy p{font-size:10px}
+.rays-stage.hide-copy .hero-copy{display:none}
+.rays-stage .text-vignette{z-index:3;opacity:.15}
+.rays-stage.hide-copy .text-vignette{display:none}
+.rays-status{margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;color:#788997}
+.rays-status .ready{color:#3d7662}.rays-status .error{color:#a65353}
+.rays-panel .panel-title{margin-bottom:13px}.rays-panel .panel-title h2{font-size:22px}
+.rays-panel .setting-section{padding-block:22px}
+.rays-panel .note{font-size:11px;line-height:1.85;color:#6c7c8b;margin:0 0 14px}
+.rays-panel .study-points{margin:0;padding-left:19px;font-size:11px;color:#617180;line-height:2}
+.rays-panel .study-points li+li{margin-top:6px}
+.rays-panel .gate-status{font-size:11px;color:#82705f;border:1px solid #ebdfcb;background:#fbf8f2;padding:12px 14px;border-radius:8px;line-height:1.7}
+.rays-panel .tiny{font-size:10px;color:#93a0aa;line-height:1.85}
+.rays-panel .tiny a{text-decoration:underline;text-underline-offset:2px;color:#5a768d}
+.rays-panel .button-muted{cursor:pointer;width:100%;text-align:center}
+.rays-panel .button-muted:hover{background:#f7f9fa}
+@media(max-width:1100px){.rays-shell .preview-backdrop{height:min(640px,56vw);min-height:350px}}
+@media(max-width:780px){.rays-shell .preview-backdrop{height:min(580px,76vw);min-height:340px}.rays-panel .panel-actions{padding-top:18px}}
+@media(max-width:460px){.rays-shell .preview-heading{flex-direction:column;align-items:flex-start}.rays-shell .preview-toolbar{flex-wrap:wrap}.rays-shell .preview-backdrop{padding:10px;min-height:310px}.rays-stage .hero-copy h2{font-size:29px}.rays-stage.mobile .hero-copy h2{font-size:25px}}
+</style>
+</head>
+<body data-page="editor" class="rays-shell">
+<div class="shell">
+<header class="header">
+  <a class="wordmark" href="../../index.html" aria-label="Motion Library 一覧へ"><span class="mark"><b></b><b></b><b></b></span><span>motion<span>library</span></span></a>
+  <span class="header-label">STATIC VISUAL STUDY / LIGHT RAYS</span>
+  <a class="header-back" href="../../index.html">← 一覧へ戻る</a>
+</header>
+<main class="editor-layout">
+  <section class="preview-area" aria-labelledby="study-title">
+    <div class="preview-heading">
+      <div class="preview-identity"><span class="eyebrow">CANDIDATE / CATEGORY 04</span><h1 id="study-title">Light Rays</h1></div>
+      <span class="render-state" id="render-status" role="status" aria-live="polite">WebGLを確認中…</span>
+    </div>
+    <div class="preview-toolbar">
+      <div class="segments" role="group" aria-label="プレビュー画面比率">
+        <button class="active" data-device="desktop" aria-pressed="true" type="button">PC</button>
+        <button data-device="mobile" aria-pressed="false" type="button">スマホ</button>
+      </div>
+      <div class="preview-tool-right"><label class="inline-check"><input type="checkbox" checked id="show-text"> 文字を表示</label></div>
+    </div>
+    <div class="preview-backdrop">
+      <div class="hero rays-stage" id="rays-stage">
+        <canvas id="rays-canvas" aria-hidden="true"></canvas>
+        <div class="text-vignette"></div>
+        <div class="hero-copy">
+          <span>BRAND EXPERIENCE / 2026</span>
+          <h2>光がつくる、<br>新しい体験。</h2>
+          <p>テクノロジーとクリエイティブで、<br>ブランドの可能性をひらく。</p>
+        </div>
+        <span class="hero-watermark">LIGHT RAYS / STUDY 001</span>
+      </div>
+    </div>
+    <div class="rays-status"><span id="render-diagnostics">WebGL静止プレビューを読み込み中…</span><span>背景と文字は別レイヤーです</span></div>
+    <div class="preview-help"><span>右上から差し込む光の表現を、静止画として品質評価します。</span><span>参考画像とは異なる実WebGL描画です。</span></div>
+  </section>
+  <aside class="editor-panel rays-panel" aria-label="Light Rays品質検証の状態">
+    <div class="panel-title"><div><div class="eyebrow">VISUAL REVIEW</div><h2>光の品質検証</h2></div></div>
+    <p class="gate-status">静止ビジュアルの承認待ち。正式ライブラリには未収録です。</p>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">01</span><h3>今回の構図</h3></div>
+      <p class="note">深いネイビーの空気感をベースに、右上から薄い白青色の光が広がる表現です。</p>
+      <p class="note">左側は見出しのための余白を確保し、光そのものが主張しすぎないバランスを狙っています。</p>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">02</span><h3>品質チェック</h3></div>
+      <ul class="study-points">
+        <li>光線が均等な線の並びに見えないか</li>
+        <li>強すぎる発光や人工的な境界がないか</li>
+        <li>奥行き・薄い霧の階調が自然か</li>
+        <li>PCとスマホで文字と背景が両立するか</li>
+      </ul>
+    </section>
+    <section class="setting-section">
+      <div class="section-heading"><span class="section-number">03</span><h3>現段階の機能</h3></div>
+      <p class="note">WebGLで生成した静止フレームです。PC／スマホ、文字のON／OFFを切り替えられます。</p>
+      <p class="tiny">アニメーション・カラーGUI・WordPress出力は、静止画品質が合格した後に実装します。</p>
+    </section>
+    <div class="panel-actions"><button type="button" id="background-only" class="button-muted">文字なしで確認する</button><p>既存3作品・ギャラリー・WordPress出力機能には変更していません。</p></div>
+  </aside>
+</main>
+<footer class="footer"><span>Motion Library / Light Rays Study 001 — Quality Gate</span><span>Original WebGL shader · Not approved yet</span></footer>
+</div>
+<script src="./renderer.js" defer></script>
+<script>
+(() => {
+  'use strict';
+  const stage=document.getElementById('rays-stage');
+  const checkbox=document.getElementById('show-text');
+  const button=document.getElementById('background-only');
+  function setText(v){checkbox.checked=v;stage.classList.toggle('hide-copy',!v);button.textContent=v?'文字なしで確認する':'文字を重ねて確認する'}
+  function setDevice(v){stage.classList.toggle('mobile',v==='mobile');document.querySelectorAll('[data-device]').forEach(el=>{const on=el.dataset.device===v;el.classList.toggle('active',on);el.setAttribute('aria-pressed',String(on))});window.motionLightRaysStudy?.redraw();}
+  checkbox.addEventListener('change',()=>setText(checkbox.checked));
+  button.addEventListener('click',()=>setText(!checkbox.checked));
+  document.querySelectorAll('[data-device]').forEach(el=>el.addEventListener('click',()=>setDevice(el.dataset.device)));
+})();
+</script>
+</body></html>
