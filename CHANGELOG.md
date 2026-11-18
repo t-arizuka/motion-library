@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Glass Study 001 — Real Three.js static visual prototype (2026-11-18)
+- 第4カテゴリ候補「Optical Glass」の静止WebGL試作ページを新規追加: studies/optical-glass-001/index.html
+- scene.jsで厚みのある3本の曲面リボン、MeshPhysicalMaterialの透過・屈折/IOR/減衰・PMREM studio環境反射を構築。Bloom未使用。
+- 深いネイビー背景、右側主役・左側文字余白。PC/スマホ比率と仮テキスト表示/非表示の確認機能を追加。
+- 自動アニメーション・GUI調整・WordPress出力・正式ギャラリー追加は**未実装**。
+- JavaScript構文とジオメトリ検査（モック: 曲面3本、各9,350頂点・56,088インデックス、無効な頂点/面なし）を実施。
+- **ブラウザの実GPU描画とビジュアル品質判定は未実施。** ローカルChromiumでWebGL2が無効、外部CDNへの接続も不可。ユーザー承認待ち。
+
 ## 016 — Code-only WordPress export / auto-host (2026-11-18)
 - WordPress出力ダイアログを「生成HTML＋コピーボタン」に集約。配信元URLの表示/入力、サイズ概要、ポップアップ内実寸プレビューを削除。
 - 3作品と単体HTML版に反映。エディタ本体の実寸プレビュー・表示サイズの設定は維持。
