@@ -256,7 +256,7 @@ function normalizePublishUrl(input){
   url.pathname=url.pathname.replace(/\/$/,'')+'/';
   return url;
 }
-function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layout=LAYOUT_DEFAULT){
+function generateIframeEmbed(template,settings,publishUrl,layout=LAYOUT_DEFAULT){
   const cfg=encodeConfig(template,settings);
   const {maxWidth,maxHeight}=validateLayout(layout);
   const base=normalizePublishUrl(publishUrl);
@@ -264,12 +264,8 @@ function generateIframeEmbed(template,settings,publishUrl,mode='with-text',layou
   const background=settings.colorBack||settings.colors[0];
   const frame=`<iframe title="Motion Library 背景" aria-hidden="true" tabindex="-1" loading="eager" src="${target.href.replaceAll('&','&amp;')}" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>`;
   const wrapperStart=`<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:${maxWidth===null?'100%':maxWidth+'px'};margin:0 auto;height:clamp(320px,70vh,${maxHeight}px);overflow:hidden;background:${background}">`;
-  if(mode==='background')return wrapperStart+frame+'</div>';
-  if(mode!=='with-text')throw Error('出力形式が不正です');
-  // Text/buttons are normal WordPress HTML outside the iframe (and stay clickable).
-  const overlay=`<div class="motion-library-mv-content" style="position:relative;z-index:1;height:100%;min-height:0;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>`;
-  // A single line helps Classic Editor avoid wpautop injecting unwanted tags.
-  return wrapperStart+frame+overlay+'</div>';
+  // Background-only: the existing WordPress/theme text and buttons remain untouched.
+  return wrapperStart+frame+'</div>';
 }
 function localPreviewUrl(template,settings,layout=LAYOUT_DEFAULT){
   const u=new URL('embed-test.html',location.href);u.searchParams.set('data',encodeConfig(template,settings));const v=validateLayout(layout);u.searchParams.set('w',v.maxWidth===null?'100%':String(v.maxWidth));u.searchParams.set('h',v.maxHeight);return u.href;
@@ -450,44 +446,43 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     window.open(url,'_blank','noopener');
   });
   function refreshExport(){
-    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
     $('export-template-name').textContent=TEMPLATES[editorId].title;
     $('export-dimensions').textContent=sizeLabel();
     try{
-      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,mode,deepCopy(getLayout()));
-      const host=normalizePublishUrl(publishUrl.value).hostname.toLowerCase(),personal=host.endsWith('.github.io');
+      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,deepCopy(getLayout()));
+      const publicBase=normalizePublishUrl(publishUrl.value);
+      const personal=publicBase.hostname.toLowerCase().endsWith('.github.io');
+      const current=$('publish-url-current');
+      current.textContent=publicBase.href;
+      current.href=publicBase.href;
       $('source-privacy').classList.toggle('is-personal-host',personal);
-      $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。社内レビュー用として利用し、納品時は独自ドメインなど個人名のない公開URLに変更してください。':'この配信URLが埋め込みコードに記載されます。納品前に公開URLを確認してください。';
+      $('source-privacy').textContent=personal?'GitHub PagesのURLにはユーザー名が含まれます。納品時は配信先を確認してください。':'このURLから背景を読み込みます。';
       $('embed-code').value=code;
-      $('export-warning').textContent=mode==='background'?'背景のみを出力します。既存テーマで文字を重ねる場合は、MVの親要素内に配置してください。':'文字・ボタンはWordPressのHTMLとして編集できます。クラシックエディタの「テキスト」タブへ貼り付けてください。';
+      $('export-warning').textContent='背景のみを出力します。文字やボタンはWordPress側の既存要素を使用してください。';
       $('copy-embed').disabled=false;
       try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
     }catch(error){
       $('embed-code').value='';
-      $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='利用できるHTTPSの配信URLを入力してください。';
+      $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='配信元のURLを確認してください。';
+      const current=$('publish-url-current');current.textContent='公開URLを確認できません';current.removeAttribute('href');
       $('copy-embed').disabled=true;
       $('export-warning').textContent=error.message||'公開済みHTTPSの配信URLを入力してください。';
     }
   }
   $('export-wp').addEventListener('click',()=>{refreshExport();embedDialog.showModal();});
   publishUrl.addEventListener('input',refreshExport);
-  document.querySelectorAll('input[name="export-mode"]').forEach(r=>r.addEventListener('change',refreshExport));
   $('close-embed').addEventListener('click',()=>embedDialog.close());
   embedDialog.addEventListener('click',e=>{if(e.target===embedDialog)embedDialog.close();});
   $('copy-embed').addEventListener('click',async()=>{
     const code=$('embed-code').value;
     if(!code)return;
     try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(code);toast('WordPress用HTMLをコピーしました');return;}}catch(e){}
-    // Clipboard fallback requires the source textarea to be visible.
-    const codeDetails=document.querySelector('.export-code-details');
-    if(codeDetails&&!codeDetails.open)codeDetails.open=true;
     $('embed-code').focus();$('embed-code').select();
     if(document.execCommand('copy'))toast('WordPress用HTMLをコピーしました');
     else toast('Ctrl+Cでコピーしてください');
   });
   $('download-test').addEventListener('click',()=>{
-    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
-    window.open(actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),mode==='with-text'),'_blank','noopener');
+    window.open(actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),false),'_blank','noopener');
   });
   window.addEventListener('pagehide',()=>{cancelAnimationFrame(paintFrame);currentMount?.dispose();});
   startEditorRender();
