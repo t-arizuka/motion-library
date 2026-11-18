@@ -577,53 +577,47 @@ body.study-actual .preview-area{max-width:100%}
     const cfg={schemaVersion:1,template:'silk-cascade',settings:validateSettings(values.cascade)};
     return btoa(JSON.stringify(cfg)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
-  function iframeEmbed(mode){
-    if(mode!=='with-text'&&mode!=='background')throw Error('出力形式が不正です');
+  function iframeEmbed(){
     const u=new URL('embed/silk/v1/index.html',baseUrl(publish.value));
     u.searchParams.set('data',encodeSilk());
     const w=layout.maxWidth===null?'100%':layout.maxWidth+'px',bg=values.cascade.colors.background;
     const open='<div class="motion-library-mv" style="position:relative;isolation:isolate;width:100%;max-width:'+w+';margin:0 auto;height:clamp(320px,70vh,'+layout.maxHeight+'px);overflow:hidden;background:'+bg+'">';
     const frame='<iframe title="Motion Library Silk Cascade 背景" aria-hidden="true" tabindex="-1" loading="eager" src="'+u.href.replace(/&/g,'&amp;')+'" style="position:absolute;inset:0;display:block;width:100%;height:100%;border:0;pointer-events:none;z-index:0" scrolling="no"></iframe>';
-    if(mode==='background')return open+frame+'</div>';
-    const copy='<div class="motion-library-mv-content" style="position:relative;z-index:1;height:100%;min-height:0;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(24px,7vw,110px);color:#fff;text-shadow:0 2px 24px #17233755"><h2 style="font-size:clamp(28px,4.2vw,64px);line-height:1.35;margin:0 0 18px">ここにキャッチコピーを入力</h2><p style="font-size:clamp(14px,1.2vw,18px);margin:0 0 30px">説明文をWordPress側で編集できます。</p><a href="/" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e293b;text-decoration:none;border-radius:4px;text-shadow:none">詳しく見る →</a></div>';
-    return open+frame+copy+'</div>';
+    return open+frame+'</div>';
   }
   function refreshExport(){
-    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
     $('export-template-name').textContent='Silk Cascade';
     $('export-dimensions').textContent=(layout.maxWidth===null?'幅100%':'最大幅'+layout.maxWidth+'px')+' / 高さ最大'+layout.maxHeight+'px';
     try{
-      $('embed-code').value=iframeEmbed(mode);
+      $('embed-code').value=iframeEmbed();
       const b=baseUrl(publish.value),personal=b.hostname.toLowerCase().endsWith('.github.io');
+      const current=$('publish-url-current');current.textContent=b.href;current.href=b.href;
       $('source-privacy').classList.toggle('is-personal-host',personal);
-      $('source-privacy').textContent=personal?'現在のURLにはGitHubユーザー名が含まれます。正式納品前に配信元URLを変更してください。':'この公開配信URLが埋め込みHTMLに記載されます。';
-      $('export-warning').textContent=mode==='background'?'背景だけのコードです。文字はWordPress側で重ねてください。':'キャッチコピーとボタンはWordPress側で編集できます。';
+      $('source-privacy').textContent=personal?'GitHub PagesのURLにはユーザー名が含まれます。正式納品前に配信先を確認してください。':'このURLから背景を読み込みます。';
+      $('export-warning').textContent='背景のみを出力します。文字やボタンはWordPress側の既存要素を使用してください。';
       $('copy-embed').disabled=false;
       try{localStorage.setItem(PUBLISH_KEY,b.href)}catch(e){}
     }catch(e){
       $('embed-code').value='';$('copy-embed').disabled=true;
-      $('source-privacy').textContent='公開されたHTTPSの配信URLを入力してください。';
+      $('source-privacy').textContent='配信元URLを確認してください。';
+      const current=$('publish-url-current');current.textContent='配信元URLを確認できません';current.removeAttribute('href');
       $('export-warning').textContent=e.message;
     }
   }
   $('export-wp').addEventListener('click',()=>{refreshExport();dialog.showModal()});
   publish.addEventListener('input',refreshExport);
-  document.querySelectorAll('input[name="export-mode"]').forEach(el=>el.addEventListener('change',refreshExport));
   $('close-embed').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
   $('copy-embed').addEventListener('click',async()=>{
     const content=$('embed-code').value;if(!content)return;
     try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(content);notify('WordPress用HTMLをコピーしました');return}}catch(e){}
-    const detail=document.querySelector('.export-code-details');
-    if(detail&&!detail.open)detail.open=true;
     $('embed-code').focus();$('embed-code').select();
     if(document.execCommand('copy'))notify('WordPress用HTMLをコピーしました');
     else notify('Ctrl+Cでコピーしてください');
   });
   $('download-test').addEventListener('click',()=>{
-    const mode=document.querySelector('input[name="export-mode"]:checked')?.value||'with-text';
     const u=new URL(reviewURL('actual'));
-    u.searchParams.set('text',mode==='with-text'?'1':'0');
+    u.searchParams.set('text','0');
     window.open(u.href,'_blank','noopener');
   });
   $('save-settings').addEventListener('click',()=>{
