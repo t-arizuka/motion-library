@@ -44,7 +44,7 @@ void main(){
   col+=vec3(.012,.028,.046)*smoothstep(.04,.92,uv.x);
   col+=vec3(.024,.062,.091)*ellipse(uv,vec2(.77,.47),vec2(.58,.70));
   col+=vec3(.015,.029,.047)*ellipse(uv,vec2(.66,.21),vec2(.43,.35));
-  col*=1.0-.10*smoothstep(.25,0.0,uv.y);
+  col*=1.0-.10*(1.0-smoothstep(0.0,.25,uv.y));
 
   // Unequal optical-depth volumes; not a periodic ray/line pattern.
   float inFan=smoothstep(-3.06,-2.42,a)*(1.0-smoothstep(-1.06,-.63,a));
