@@ -166,3 +166,24 @@ body[data-page="editor"] .footer{padding-block:16px}
   .export-dialog-v2 .embed-dialog-actions .button-muted{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.export-choice{transition:none}}
+
+/* 015 — Simplified WordPress background-only export */
+.export-source-overview{margin-top:20px}
+.export-source-overview .export-section-title{margin-bottom:8px}
+.export-source-overview .export-source-caption{margin-left:auto;color:#9ca8b1;font-size:10px}
+.export-source-link{display:block;width:100%;box-sizing:border-box;padding:11px 12px;min-height:41px;background:#f7f9fa;border:1px solid #e1e7ec;border-radius:8px;color:#394e60;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;text-decoration:none}
+.export-source-link[href]:hover{text-decoration:underline;text-underline-offset:3px}
+.export-source-overview .source-privacy{font-size:10px;color:#8c96a1;line-height:1.6;margin:8px 0 0;padding:0;background:transparent;border:none}
+.export-source-overview .source-privacy.is-personal-host{font-size:10px;color:#997153;line-height:1.6;margin:8px 0 0;padding:0;background:transparent;border:none}
+.export-url-settings{margin-top:9px;font-size:11px;color:#536b7e}
+.export-url-settings>summary{cursor:pointer;list-style:none;width:max-content;max-width:100%;font-weight:600;padding:5px 0}
+.export-url-settings>summary::-webkit-details-marker{display:none}
+.export-url-settings>summary:before{content:'＋';margin-right:7px}
+.export-url-settings[open]>summary:before{content:'−'}
+.export-url-settings>label{display:block;margin:10px 0 6px;color:#748391;font-size:10px}
+.export-url-settings>input{display:block;width:100%;min-width:0;box-sizing:border-box;padding:11px 12px;border:1px solid #d8e0e8;border-radius:8px;color:#36485a;font:12px ui-monospace,Consolas,monospace}
+.export-code-visible{margin-top:19px;padding-top:16px;border-top:1px solid #edf0f2}
+.export-code-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#52687b;font-weight:650;font-size:12px}
+.export-code-heading small{font-size:10px;font-weight:400;color:#99a5af}
+.export-dialog-v2 .export-code-visible #embed-code{display:block;width:100%;height:144px;min-height:100px;box-sizing:border-box;margin-top:12px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all;overflow-x:hidden;padding:12px;font:11px/1.7 ui-monospace,Consolas,monospace;color:#46586c;background:#f9fafb;border:1px solid #e1e6ec;border-radius:8px}
+.export-dialog-v2 .export-output-summary{margin-top:17px}
