@@ -17,7 +17,8 @@
 .rays-stage .hero-copy h2{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:450;font-size:clamp(31px,3.6vw,60px);line-height:1.55;letter-spacing:.03em;margin:22px 0 16px}
 .rays-stage .hero-copy p{font-size:clamp(10px,1vw,14px);line-height:1.8;color:#dce8ee;letter-spacing:.015em}
 .rays-stage .hero-watermark{color:#c8d4e390;font:9px ui-monospace,Consolas,monospace;letter-spacing:.12em;z-index:4}
-.rays-stage.mobile{width:min(290px,100%);height:100%}
+.rays-stage.mobile{width:auto;height:100%;aspect-ratio:390/844;max-width:100%}
+.rays-shell .preview-backdrop:has(.rays-stage.mobile){height:680px}
 .rays-stage.mobile .hero-copy{left:9%;top:24%;right:8%}
 .rays-stage.mobile .hero-copy h2{font-size:28px;line-height:1.6}
 .rays-stage.mobile .hero-copy p{font-size:10px}
