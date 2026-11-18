@@ -215,32 +215,19 @@ body.study-actual .preview-area{max-width:100%}
 <footer class="footer"><span>Motion Library — Silk Cascade / Editor 014</span><span>Radiant / MIT · © 2025 Paul Bakaus</span></footer>
 </div>
 <dialog id="embed-dialog" class="embed-dialog export-dialog-v2" aria-labelledby="embed-heading">
-  <div class="embed-dialog-head"><div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">背景アニメーションのみを書き出します。クラシックエディタの「テキスト」タブに貼り付けてください。</p></div><button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button></div>
-
-  <section class="export-source-overview" aria-label="配信元URLの確認">
-    <div class="export-section-title"><h3>配信元URL</h3><span class="export-source-caption">現在の設定</span></div>
-    <a id="publish-url-current" class="export-source-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="配信元の公開URLを開いて確認">公開URLを読み込み中…</a>
-    <p id="source-privacy" class="source-privacy" role="status" aria-live="polite"></p>
-    <details class="export-url-settings">
-      <summary>配信元URLを変更する</summary>
-      <label for="publish-url">移行時など、配信先を変更するときだけ編集してください</label>
-      <input id="publish-url" type="url" placeholder="https://your-project.example/" autocomplete="url" spellcheck="false" aria-describedby="source-privacy">
-    </details>
-  </section>
-  <div class="export-output-summary" aria-live="polite">
-    <div><span>背景</span><strong id="export-template-name">Silk Cascade</strong></div>
-    <div><span>出力サイズ</span><strong id="export-dimensions">幅100% / 高さ最大760px</strong></div>
+  <div class="embed-dialog-head">
+    <div><span class="eyebrow">WORDPRESS / EXPORT</span><h2 id="embed-heading">WordPress用HTML</h2><p class="export-subheading">背景のみのHTMLコードです。WordPressの「テキスト」タブへ貼り付けてください。</p></div>
+    <button type="button" id="close-embed" class="dialog-close" aria-label="閉じる">×</button>
   </div>
+  <section class="export-code-visible" aria-labelledby="export-code-heading">
+    <div class="export-code-heading"><span id="export-code-heading">生成されたHTMLコード</span><small>このまま貼り付けできます</small></div>
+    <textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
+  </section>
   <p id="export-warning" class="export-warning" role="status" aria-live="polite"></p>
   <div class="embed-dialog-actions">
     <button type="button" id="copy-embed" class="button-primary">WordPress用HTMLをコピー <span aria-hidden="true">⧉</span></button>
-    <button type="button" id="download-test" class="button-muted">実寸プレビュー ↗</button>
   </div>
-  <section class="export-code-visible" aria-labelledby="export-code-heading">
-    <div class="export-code-heading"><span id="export-code-heading">生成されたHTMLコード</span><small>いつでも確認・選択できます</small></div>
-    <textarea id="embed-code" readonly wrap="soft" spellcheck="false" aria-label="WordPressに貼り付けるHTMLコード"></textarea>
-  </section>
-  <p class="embed-caveat">※ 公開HTTPS URL・iframeを許可するWordPress環境が必要です。既存テーマに重ねる場合は配置調整が必要です。</p>
+  <p class="embed-caveat">※ WordPressでiframeを許可する環境が必要です。背景以外の文字・ボタンは出力しません。</p>
 </dialog>
 <div class="toast" id="silk-toast" role="status" aria-live="polite"></div>
 <script>
