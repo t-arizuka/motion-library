@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 016 — Code-only WordPress export / auto-host (2026-11-18)
+- WordPress出力ダイアログを「生成HTML＋コピーボタン」に集約。配信元URLの表示/入力、サイズ概要、ポップアップ内実寸プレビューを削除。
+- 3作品と単体HTML版に反映。エディタ本体の実寸プレビュー・表示サイズの設定は維持。
+- 背景の配信URLは開いている編集画面のHTTPS配信元を使って自動生成。旧localStorageの配信URLは参照しない。
+- 最終配信は**会社のVercel Pro（承認後）**で決定済み。実際の移行はまだ行わずGitHub Pagesで開発継続。
+- 旧WordPressコードはVercel移行時に再生成・差替えが必要。既存のWebGLレンダラーは変更なし。
+- HTML/JS静的検査を実施。最新UIとWordPressへの再貼り付けの実ブラウザ検証は未実施。
+
 ## 015 — Background-only WordPress export (2026-11-18)
 - ユーザーがWordPress上の実際の背景反映を確認（詳細な保存・再編集・機種別テストは未確認）。
 - Mesh / Grain / Silkの出力ダイアログからMVセット/背景のみの選択を削除し、背景iframeだけのHTMLを生成するよう変更。
