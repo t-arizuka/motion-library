@@ -241,47 +241,28 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
   $('reset').addEventListener('click',()=>{if(!confirm('このアニメーションの色と設定を初期値に戻しますか？'))return;saved[editorId]=makeDefaultSettings(editorId);persist();savedLayouts[editorId]={...LAYOUT_DEFAULT};persistLayout();syncLayout();const val=getEditorState();drawColors();buildAdvanced();$('speed').value=val.speed;$('strength').value=val.strength;$('speed-val').textContent=val.speed.toFixed(2);$('strength-val').textContent=val.strength.toFixed(2);refreshShader();toast('初期設定に戻しました');});
   $('save').addEventListener('click',()=>{const file={schemaVersion:3,template:editorId,settings:deepCopy(getEditorState()),layout:deepCopy(getLayout())};const blob=new Blob([JSON.stringify(file,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`motion-${editorId}-settings.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('設定を保存しました');});
   $('load').addEventListener('click',()=>$('load-file').click());$('load-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>64000)throw Error('ファイルが大きすぎます');const data=JSON.parse(await file.text());if(data.schemaVersion!==3||data.template!==editorId)throw Error('このアニメーション用の設定ファイルではありません');saved[editorId]=validate(editorId,data.settings);persist();if(data.layout){savedLayouts[editorId]=validateLayout(data.layout);persistLayout();syncLayout();}drawColors();buildAdvanced();const s=getEditorState();$('speed').value=s.speed;$('strength').value=s.strength;$('speed-val').textContent=s.speed.toFixed(2);$('strength-val').textContent=s.strength.toFixed(2);refreshShader();toast('設定を読み込みました');}catch(err){toast(`読み込みエラー: ${err.message||err}`);}finally{e.target.value='';}});
-  // No-plugin background iframe export. All copy and buttons remain in WordPress DOM.
+  // Single-purpose WordPress output: the background HTML only.
+  // Resolve the delivery origin from this editor's URL. Hosting the same files
+  // on the company's approved Vercel site automatically switches the generated src.
   const embedDialog=$('embed-dialog');
-  const publishUrl=$('publish-url');
-  try{
-    const stored=localStorage.getItem('ml-publish-base')||'';
-    publishUrl.value=stored||(location.protocol==='https:'?new URL('.',location.href).href:'');
-  }catch(e){}
-  const sizeLabel=()=>{
-    const size=getLayout();
-    return (size.maxWidth===null?'幅100%':'最大幅'+size.maxWidth+'px')+' / 高さ 最大'+size.maxHeight+'px（画面高70%を基準）';
-  };
   $('open-actual-preview').addEventListener('click',()=>{
     const url=actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),showCopy);
     window.open(url,'_blank','noopener');
   });
   function refreshExport(){
-    $('export-template-name').textContent=TEMPLATES[editorId].title;
-    $('export-dimensions').textContent=sizeLabel();
     try{
-      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),publishUrl.value,deepCopy(getLayout()));
-      const publicBase=normalizePublishUrl(publishUrl.value);
-      const personal=publicBase.hostname.toLowerCase().endsWith('.github.io');
-      const current=$('publish-url-current');
-      current.textContent=publicBase.href;
-      current.href=publicBase.href;
-      $('source-privacy').classList.toggle('is-personal-host',personal);
-      $('source-privacy').textContent=personal?'GitHub PagesのURLにはユーザー名が含まれます。納品時は配信先を確認してください。':'このURLから背景を読み込みます。';
+      const currentHost=new URL('.',location.href).href;
+      const code=generateIframeEmbed(editorId,deepCopy(getEditorState()),currentHost,deepCopy(getLayout()));
       $('embed-code').value=code;
-      $('export-warning').textContent='背景のみを出力します。文字やボタンはWordPress側の既存要素を使用してください。';
+      $('export-warning').textContent='';
       $('copy-embed').disabled=false;
-      try{localStorage.setItem('ml-publish-base',normalizePublishUrl(publishUrl.value).href);}catch(e){}
     }catch(error){
       $('embed-code').value='';
-      $('source-privacy').classList.remove('is-personal-host');$('source-privacy').textContent='配信元のURLを確認してください。';
-      const current=$('publish-url-current');current.textContent='公開URLを確認できません';current.removeAttribute('href');
       $('copy-embed').disabled=true;
-      $('export-warning').textContent=error.message||'公開済みHTTPSの配信URLを入力してください。';
+      $('export-warning').textContent=error.message||'公開されたHTTPSのMotion Libraryから開いてください。';
     }
   }
   $('export-wp').addEventListener('click',()=>{refreshExport();embedDialog.showModal();});
-  publishUrl.addEventListener('input',refreshExport);
   $('close-embed').addEventListener('click',()=>embedDialog.close());
   embedDialog.addEventListener('click',e=>{if(e.target===embedDialog)embedDialog.close();});
   $('copy-embed').addEventListener('click',async()=>{
@@ -291,9 +272,6 @@ function setupEditor(){readSaved();editorId=selectedTemplate();saved[editorId]??
     $('embed-code').focus();$('embed-code').select();
     if(document.execCommand('copy'))toast('WordPress用HTMLをコピーしました');
     else toast('Ctrl+Cでコピーしてください');
-  });
-  $('download-test').addEventListener('click',()=>{
-    window.open(actualSizePreviewUrl(editorId,deepCopy(getEditorState()),deepCopy(getLayout()),false),'_blank','noopener');
   });
   window.addEventListener('pagehide',()=>{cancelAnimationFrame(paintFrame);currentMount?.dispose();});
   startEditorRender();
